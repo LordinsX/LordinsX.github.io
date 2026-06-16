@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.firebasedatabase.app wss://*.firebasedatabase.app; img-src 'self' data: https: blob:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админ-панель</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -69,7 +68,6 @@
       map = L.map('map').setView([55.75, 37.61], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
 
-      // 1. Логи
       db.ref('logs').limitToLast(40).on('child_added', (snapshot) => {
         const log = snapshot.val();
         const logEl = document.getElementById('log-list');
@@ -85,7 +83,6 @@
         }
       });
 
-      // 2. Игроки
       db.ref('players').on('value', (snapshot) => {
         const teamsData = snapshot.val() || {};
         const listEl = document.getElementById('player-list');
@@ -104,7 +101,6 @@
         for (const id in allPlayers) {
           const p = allPlayers[id];
           if (p.kicked || Date.now() - p.timestamp > 300000) continue;
-          // 👇 Защита от "мусорных" записей без координат
           if (!p.lat || !p.lng) continue;
           
           const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[p.team] || '⚪'}</div>`, iconSize: [30, 30] });

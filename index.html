@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.firebasedatabase.app wss://*.firebasedatabase.app; img-src 'self' data: https: blob:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Карта полигона</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -79,7 +78,6 @@
       map = L.map('map').setView([55.75, 37.61], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
 
-      // 1. Личный статус (кик/SOS)
       db.ref('players/' + myTeam + '/' + playerId).on('value', (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
@@ -98,7 +96,6 @@
         }
       });
 
-      // 2. Союзники на карте
       db.ref('players/' + myTeam).on('value', (snapshot) => {
         const players = snapshot.val() || {};
         for (const id in markers) {
@@ -108,16 +105,13 @@
         for (const id in players) {
           const p = players[id];
           if (p.kicked || Date.now() - p.timestamp > 300000) continue;
-          // 👇 Защита от "мусорных" записей без координат
           if (!p.lat || !p.lng) continue;
-          
           const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[myTeam] || '⚪'}</div>`, iconSize: [30, 30] });
           if (!markers[id]) markers[id] = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`<b>${p.nick}</b>`);
           else markers[id].setLatLng([p.lat, p.lng]);
         }
       });
 
-      // 3. Отправка GPS
       if (navigator.geolocation) {
         watchId = navigator.geolocation.watchPosition((pos) => {
           db.ref('players/' + myTeam + '/' + playerId).update({
