@@ -27,7 +27,7 @@
 <body>
   <div id="login-screen">
     <h2>🔐 Вход для организатора</h2>
-    <input type="password" id="adminPass" placeholder="Пароль админа">
+    <input type="password" id="adminPass" autocomplete="current-password" placeholder="Пароль админа">
     <button onclick="checkAdmin()">Войти</button>
     <p id="error-msg" style="color: #f44336; display: none;">Неверный пароль</p>
   </div>
@@ -69,6 +69,7 @@
       map = L.map('map').setView([55.75, 37.61], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
 
+      // 1. Логи
       db.ref('logs').limitToLast(40).on('child_added', (snapshot) => {
         const log = snapshot.val();
         const logEl = document.getElementById('log-list');
@@ -84,6 +85,7 @@
         }
       });
 
+      // 2. Игроки
       db.ref('players').on('value', (snapshot) => {
         const teamsData = snapshot.val() || {};
         const listEl = document.getElementById('player-list');
@@ -94,12 +96,17 @@
             allPlayers[id] = { ...teamsData[team][id], team: team, dbId: id };
           }
         }
-        for (const id in markers) { if (!allPlayers[id] || allPlayers[id].kicked) map.removeLayer(markers[id]); }
+        for (const id in markers) {
+          if (!allPlayers[id] || allPlayers[id].kicked) map.removeLayer(markers[id]);
+        }
 
         const icons = { red: '🔴', blue: '🔵', spec: '⚪' };
         for (const id in allPlayers) {
           const p = allPlayers[id];
           if (p.kicked || Date.now() - p.timestamp > 300000) continue;
+          // 👇 Защита от "мусорных" записей без координат
+          if (!p.lat || !p.lng) continue;
+          
           const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[p.team] || '⚪'}</div>`, iconSize: [30, 30] });
           if (!markers[id]) markers[id] = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`<b>${p.nick}</b> (${p.team})`);
           else markers[id].setLatLng([p.lat, p.lng]);
