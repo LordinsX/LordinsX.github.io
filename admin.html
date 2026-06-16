@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; }
+    #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+    #login-screen input, #login-screen button { padding: 12px; margin: 8px; width: 250px; font-size: 16px; border-radius: 6px; border: none; }
+    #login-screen button { background: #f44336; color: white; cursor: pointer; }
+    #sidebar { width: 320px; background: #f4f4f4; padding: 15px; display: flex; flex-direction: column; border-right: 1px solid #ccc; display: none; }
+    #player-list { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+    #map { flex: 1; display: none; }
+    .player-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; margin-bottom: 6px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .player-row.sos-active { border: 2px solid #f44336; background: #ffebee; }
+    .btn { border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 4px; color: white; }
+    .btn-kick { background: #f44336; }
+    .btn-sos-clear { background: #ff9800; }
+    .clear-btn { width: 100%; background: #d32f2f; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+    #log-list { height: 200px; overflow-y: auto; background: #fff; padding: 8px; border-radius: 4px; font-size: 12px; border: 1px solid #ddd; }
+    .log-entry { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div id="login-screen">
+    <h2>🔐 Вход для организатора</h2>
+    <input type="password" id="adminPass" placeholder="Пароль админа">
+    <button onclick="checkAdmin()">Войти</button>
+    <p id="error-msg" style="color: #f44336; display: none;">Неверный пароль</p>
+  </div>
+
+  <div id="sidebar">
+    <h3>👑 Игроки</h3>
+    <div id="player-list"></div>
+    <button class="clear-btn" onclick="clearAll()">🗑 Сбросить всех</button>
+    <h3>📜 Журнал событий</h3>
+    <div id="log-list"></div>
+  </div>
+  <div id="map"></div>
+
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const ADMIN_PASSWORD = "admin123"; 
+    let map, markers = {};
+
+    function checkAdmin() {
+      if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+        if (Notification.permission !== "granted") Notification.requestPermission();
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('sidebar').style.display = 'flex';
+        document.getElementById('map').style.display = 'block';
+        initAdminMap();
+      } else {
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    }
+
+    function initAdminMap() {
+      map = L.map('map').setView([55.75, 37.61], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+
+      db.ref('logs').limitToLast(40).on('child_added', (snapshot) => {
+        const log = snapshot.val();
+        const logEl = document.getElementById('log-list');
+        const time = new Date(log.timestamp).toLocaleTimeString();
+        const color = log.type === 'sos' ? '#d32f2f' : (log.type === 'kick' ? '#e65100' : '#555');
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.style.color = color;
+        div.innerHTML = `<b>[${time}]</b> ${log.message}`;
+        logEl.insertBefore(div, logEl.firstChild);
+        if (log.type === 'sos' && Notification.permission === "granted") {
+          new Notification("🚨 SOS ВЫЗОВ!", { body: log.message, icon: "https://cdn-icons-png.flaticon.com/512/564/564619.png" });
+        }
+      });
+
+      db.ref('players').on('value', (snapshot) => {
+        const teamsData = snapshot.val() || {};
+        const listEl = document.getElementById('player-list');
+        listEl.innerHTML = '';
+        const allPlayers = {};
+        for (const team in teamsData) {
+          for (const id in teamsData[team]) {
+            allPlayers[id] = { ...teamsData[team][id], team: team, dbId: id };
+          }
+        }
+        for (const id in markers) { if (!allPlayers[id] || allPlayers[id].kicked) map.removeLayer(markers[id]); }
+
+        const icons = { red: '🔴', blue: '🔵', spec: '⚪' };
+        for (const id in allPlayers) {
+          const p = allPlayers[id];
+          if (p.kicked || Date.now() - p.timestamp > 300000) continue;
+          const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[p.team] || '⚪'}</div>`, iconSize: [30, 30] });
+          if (!markers[id]) markers[id] = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`<b>${p.nick}</b> (${p.team})`);
+          else markers[id].setLatLng([p.lat, p.lng]);
+
+          const row = document.createElement('div');
+          row.className = 'player-row' + (p.sos ? ' sos-active' : '');
+          let actionBtns = `<button class="btn btn-kick" onclick="kickPlayer('${p.team}', '${p.dbId}', '${p.nick}')">Кик</button>`;
+          if (p.sos) actionBtns = `<button class="btn btn-sos-clear" onclick="clearSOS('${p.team}', '${p.dbId}', '${p.nick}')">Снять SOS</button>` + actionBtns;
+          row.innerHTML = `<span>${icons[p.team]} <b>${p.nick}</b> ${p.sos ? '🚨' : ''}</span> <div>${actionBtns}</div>`;
+          listEl.appendChild(row);
+        }
+      });
+    }
+
+    window.kickPlayer = function(team, id, nick) {
+      if (confirm(`Выгнать игрока ${nick}?`)) {
+        db.ref('players/' + team + '/' + id).update({ kicked: true, kickReason: "Вы выгнаны из игры. Обратитесь к ближайшему игротеху." });
+        db.ref('logs').push({ timestamp: Date.now(), type: 'kick', message: `⛔ Админ выгнал игрока ${nick} (${team})` });
+        setTimeout(() => db.ref('players/' + team + '/' + id).remove(), 3000);
+      }
+    };
+
+    window.clearSOS = function(team, id, nick) {
+      db.ref('players/' + team + '/' + id).update({ sos: false, sosTime: null });
+      db.ref('logs').push({ timestamp: Date.now(), type: 'info', message: `✅ Админ снял SOS с игрока ${nick}` });
+    };
+
+    window.clearAll = function() {
+      if (confirm('ВНИМАНИЕ: Удалить ВСЕХ игроков?')) {
+        db.ref('players').remove();
+        db.ref('logs').push({ timestamp: Date.now(), type: 'info', message: `🗑 Админ сбросил всех игроков` });
+      }
+    };
+  </script>
+</body>
+</html>

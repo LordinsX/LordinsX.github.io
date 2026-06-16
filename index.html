@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Карта полигона</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #map { height: 100vh; width: 100%; display: none; }
+    #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #222; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+    #login-screen input, #login-screen select, #login-screen button { padding: 12px; margin: 8px; width: 80%; max-width: 300px; font-size: 16px; border-radius: 6px; border: none; }
+    #login-screen button { background: #4CAF50; color: white; font-weight: bold; cursor: pointer; }
+    #kick-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
+    #kick-modal h1 { color: #f44336; font-size: 28px; margin-bottom: 10px; }
+    #kick-modal button { padding: 12px 24px; font-size: 16px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+    #sos-btn { display: none; position: fixed; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: #f44336; color: white; font-weight: 900; font-size: 20px; border: 3px solid white; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.6); z-index: 1000; cursor: pointer; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(244, 67, 54, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); } }
+    #sos-active-modal { display: none; position: fixed; bottom: 110px; right: 20px; background: rgba(244, 67, 54, 0.95); color: white; padding: 15px; border-radius: 8px; z-index: 1000; text-align: center; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    #sos-active-modal button { margin-top: 8px; background: white; color: #f44336; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="login-screen">
+    <h2>Вход на полигон</h2>
+    <input type="text" id="nickname" placeholder="Ваш позывной" maxlength="15">
+    <select id="team">
+      <option value="red">🔴 Красные</option>
+      <option value="blue">🔵 Синие</option>
+      <option value="spec">⚪ Наблюдатель</option>
+    </select>
+    <button onclick="login()">Войти на карту</button>
+  </div>
+
+  <div id="kick-modal">
+    <h1>⛔ ИГРА ОКОНЧЕНА</h1>
+    <p id="kick-message">Вы были исключены из игры.</p>
+    <button onclick="location.reload()">Понятно</button>
+  </div>
+
+  <button id="sos-btn" onclick="sendSOS()">SOS</button>
+  <div id="sos-active-modal">🚨 SOS ОТПРАВЛЕН<br><small>Ожидайте помощи</small><br><button onclick="cancelSOS()">Отменить SOS</button></div>
+  <div id="map"></div>
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const playerId = sessionStorage.getItem('sb_id') || 'player_' + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('sb_id', playerId);
+    let map, markers = {}, watchId, myTeam, myNick;
+
+    function login() {
+      myNick = document.getElementById('nickname').value.trim() || 'Безымянный';
+      myTeam = document.getElementById('team').value;
+      sessionStorage.setItem('sb_nick', myNick);
+      sessionStorage.setItem('sb_team', myTeam);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('map').style.display = 'block';
+      document.getElementById('sos-btn').style.display = 'block';
+      initMap();
+    }
+
+    if (sessionStorage.getItem('sb_nick')) {
+      myNick = sessionStorage.getItem('sb_nick');
+      myTeam = sessionStorage.getItem('sb_team');
+      document.getElementById('nickname').value = myNick;
+      document.getElementById('team').value = myTeam;
+      login();
+    }
+
+    function initMap() {
+      map = L.map('map').setView([55.75, 37.61], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+
+      db.ref('players/' + myTeam + '/' + playerId).on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        if (data.kicked) {
+          document.getElementById('kick-message').innerText = data.kickReason || "Вы выгнаны из игры.";
+          document.getElementById('kick-modal').style.display = 'flex';
+          if (watchId) navigator.geolocation.clearWatch(watchId);
+          map.remove();
+        }
+        if (data.sos) {
+          document.getElementById('sos-btn').style.display = 'none';
+          document.getElementById('sos-active-modal').style.display = 'block';
+        } else {
+          document.getElementById('sos-btn').style.display = 'block';
+          document.getElementById('sos-active-modal').style.display = 'none';
+        }
+      });
+
+      db.ref('players/' + myTeam).on('value', (snapshot) => {
+        const players = snapshot.val() || {};
+        for (const id in markers) { if (!players[id] || players[id].kicked) map.removeLayer(markers[id]); }
+        const icons = { red: '🔴', blue: '🔵', spec: '⚪' };
+        for (const id in players) {
+          const p = players[id];
+          if (p.kicked || Date.now() - p.timestamp > 300000) continue;
+          const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[myTeam] || '⚪'}</div>`, iconSize: [30, 30] });
+          if (!markers[id]) markers[id] = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`<b>${p.nick}</b>`);
+          else markers[id].setLatLng([p.lat, p.lng]);
+        }
+      });
+
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition((pos) => {
+          db.ref('players/' + myTeam + '/' + playerId).update({ nick: myNick, lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now() });
+          if (!map._initialCenter) { map.setView([pos.coords.latitude, pos.coords.longitude], 15); map._initialCenter = true; }
+        }, null, { enableHighAccuracy: true, maximumAge: 5000 });
+      }
+    }
+
+    window.sendSOS = function() {
+      db.ref('players/' + myTeam + '/' + playerId).update({ sos: true, sosTime: Date.now() });
+      db.ref('logs').push({ timestamp: Date.now(), type: 'sos', message: `🚨 SOS от ${myNick} (${myTeam})! Требуется помощь.` });
+    };
+    window.cancelSOS = function() {
+      db.ref('players/' + myTeam + '/' + playerId).update({ sos: false, sosTime: null });
+    };
+  </script>
+</body>
+</html>
