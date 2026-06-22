@@ -2,137 +2,232 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https: wss:; frame-src https://*.firebasedatabase.app; img-src 'self' data: https: blob:;">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Карта полигона</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body { margin: 0; font-family: sans-serif; }
-    #map { height: 100vh; width: 100%; display: none; }
-    #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #222; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-    #login-screen input, #login-screen select, #login-screen button { padding: 12px; margin: 8px; width: 80%; max-width: 300px; font-size: 16px; border-radius: 6px; border: none; }
-    #login-screen button { background: #4CAF50; color: white; font-weight: bold; cursor: pointer; }
-    #kick-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
-    #kick-modal h1 { color: #f44336; font-size: 28px; margin-bottom: 10px; }
-    #kick-modal button { padding: 12px 24px; font-size: 16px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-    #sos-btn { display: none; position: fixed; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: #f44336; color: white; font-weight: 900; font-size: 20px; border: 3px solid white; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.6); z-index: 1000; cursor: pointer; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(244, 67, 54, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); } }
-    #sos-active-modal { display: none; position: fixed; bottom: 110px; right: 20px; background: rgba(244, 67, 54, 0.95); color: white; padding: 15px; border-radius: 8px; z-index: 1000; text-align: center; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    #sos-active-modal button { margin-top: 8px; background: white; color: #f44336; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    body { font-family: sans-serif; padding: 15px; text-align: center; }
+    .hidden { display: none !important; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 90%; }
+    button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    input, select { padding: 8px; margin: 5px; width: 80%; max-width: 300px; }
+    #mapContainer { height: 60vh; background: #e0e0e0; margin-top: 10px; border: 1px solid #999; overflow-y: auto; }
   </style>
 </head>
 <body>
-  <div id="login-screen">
-    <h2>Вход на полигон</h2>
-    <input type="text" id="nickname" autocomplete="username" placeholder="Ваш позывной" maxlength="15">
-    <select id="team">
-      <option value="red">🔴 Красные</option>
-      <option value="blue">🔵 Синие</option>
-      <option value="spec">⚪ Наблюдатель</option>
-    </select>
-    <button onclick="login()">Войти на карту</button>
-  </div>
-
-  <div id="kick-modal">
-    <h1>⛔ ИГРА ОКОНЧЕНА</h1>
-    <p id="kick-message">Вы были исключены из игры.</p>
-    <button onclick="location.reload()">Понятно</button>
-  </div>
-
-  <button id="sos-btn" onclick="sendSOS()">SOS</button>
-  <div id="sos-active-modal">🚨 SOS ОТПРАВЛЕН<br><small>Ожидайте помощи</small><br><button onclick="cancelSOS()">Отменить SOS</button></div>
-  <div id="map"></div>
-
-  <script src="config.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <h2>Карта полигона</h2>
   
-  <script>
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  <div id="loginScreen">
+    <h3>Вход на полигон</h3>
+    <div id="joinForm" class="hidden">
+      <p>Вступление во взвод по QR-коду</p>
+      <input type="text" id="joinNick" placeholder="Ваш позывной">
+      <button onclick="joinPlatoon()">Вступить</button>
+    </div>
+    
+    <div id="normalLogin">
+      <select id="loginTeam"><option value="red">🔴 Красные</option><option value="blue">🔵 Синие</option></select>
+      <input type="text" id="loginNick" placeholder="Ваш позывной">
+      <button onclick="loginAsSoldier()">Войти как солдат</button>
+      <hr>
+      <h4>Вход для командира взвода</h4>
+      <select id="cmdTeam"><option value="red">🔴 Красные</option><option value="blue">🔵 Синие</option></select>
+      <input type="text" id="cmdPlatoonId" placeholder="ID взвода">
+      <input type="password" id="cmdPass" placeholder="Пароль взвода">
+      <button onclick="loginAsCommander()">Войти как командир</button>
+    </div>
+  </div>
 
-    const playerId = sessionStorage.getItem('sb_id') || 'player_' + Math.random().toString(36).substr(2, 9);
-    sessionStorage.setItem('sb_id', playerId);
-    let map, markers = {}, watchId, myTeam, myNick;
+  <div id="mapScreen" class="hidden">
+    <h3 id="userRoleDisplay"></h3>
+    <button id="showQrBtn" class="hidden" onclick="document.getElementById('qrModal').classList.remove('hidden')">📱 Показать QR-код для солдат</button>
+    <button onclick="sendSOS()">SOS</button>
+    <button onclick="logout()">Выйти</button>
+    
+    <div id="mapContainer">
+      <h4>Видимые объекты:</h4>
+      <div id="entitiesList" style="text-align: left; padding: 10px;"></div>
+    </div>
+  </div>
 
-    function login() {
-      myNick = document.getElementById('nickname').value.trim() || 'Безымянный';
-      myTeam = document.getElementById('team').value;
-      sessionStorage.setItem('sb_nick', myNick);
-      sessionStorage.setItem('sb_team', myTeam);
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('map').style.display = 'block';
-      document.getElementById('sos-btn').style.display = 'block';
-      initMap();
+  <div id="qrModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Отсканируйте для вступления во взвод</h3>
+      <img id="cmdQrImage" src="" style="max-width: 250px;">
+      <br><br>
+      <button onclick="document.getElementById('qrModal').classList.add('hidden')">Закрыть</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, update, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+	const firebaseConfig = {
+		apiKey: "AIzaSyAZRbc37dj2vaiACjAsD0mXUfyne_Wd9gw",
+		authDomain: "lordinsxtest.firebaseapp.com",
+		databaseURL: "https://lordinsxtest-default-rtdb.europe-west1.firebasedatabase.app",
+		projectId: "lordinsxtest",
+		storageBucket: "lordinsxtest.firebasestorage.app",
+		messagingSenderId: "611910355892",
+		appId: "1:611910355892:web:c6ecbd24579c8ee95800e1"
+	};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.set = set;
+    window.update = update;
+    window.push = push;
+    window.get = get;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let myRole = localStorage.getItem('role');
+    let myTeam = localStorage.getItem('team');
+    let myPlatoonId = localStorage.getItem('platoonId');
+    let myName = localStorage.getItem('nick');
+    let joinToken = localStorage.getItem('joinToken');
+
+    let playersData = {};
+    let platoonsData = {};
+
+    if (urlParams.get('action') === 'join') {
+      document.getElementById('normalLogin').classList.add('hidden');
+      document.getElementById('joinForm').classList.remove('hidden');
+      localStorage.setItem('pendingTeam', urlParams.get('team'));
+      localStorage.setItem('pendingPlatoon', urlParams.get('platoon'));
+      localStorage.setItem('pendingToken', urlParams.get('token'));
+    } else if (myRole) {
+      showMap();
     }
 
-    if (sessionStorage.getItem('sb_nick')) {
-      myNick = sessionStorage.getItem('sb_nick');
-      myTeam = sessionStorage.getItem('sb_team');
-      document.getElementById('nickname').value = myNick;
-      document.getElementById('team').value = myTeam;
-      login();
+    window.joinPlatoon = async function() {
+      const nick = document.getElementById('joinNick').value;
+      const team = localStorage.getItem('pendingTeam');
+      const platoonId = localStorage.getItem('pendingPlatoon');
+      const token = localStorage.getItem('pendingToken');
+
+      const snapshot = await get(ref(db, `platoons/${team}/${platoonId}`));
+      const platoon = snapshot.val();
+      
+      if (platoon && platoon.joinToken === token) {
+        const newPlayerRef = push(ref(db, `players/${team}`));
+        await set(newPlayerRef, {
+          id: newPlayerRef.key, nick, team, platoonId, role: 'soldier', timestamp: Date.now()
+        });
+        await push(ref(db, 'logs'), {
+          timestamp: Date.now(), type: 'info', message: `👤 ${nick} вступил во взвод "${platoon.name}" (${team})`
+        });
+        localStorage.setItem('role', 'soldier');
+        localStorage.setItem('team', team);
+        localStorage.setItem('platoonId', platoonId);
+        localStorage.setItem('nick', nick);
+        window.location.href = window.location.pathname;
+      } else {
+        alert('Неверная ссылка или срок действия истек');
+      }
+    };
+
+    window.loginAsSoldier = function() {
+      const nick = document.getElementById('loginNick').value;
+      const team = document.getElementById('loginTeam').value;
+      localStorage.setItem('role', 'soldier');
+      localStorage.setItem('team', team);
+      localStorage.setItem('nick', nick);
+      showMap();
+    };
+
+    window.loginAsCommander = async function() {
+      const team = document.getElementById('cmdTeam').value;
+      const platoonId = document.getElementById('cmdPlatoonId').value;
+      const password = document.getElementById('cmdPass').value;
+
+      const snapshot = await get(ref(db, `platoons/${team}/${platoonId}`));
+      const platoon = snapshot.val();
+      
+      if (platoon && platoon.password === password) {
+        await update(ref(db, `platoons/${team}/${platoonId}`), { lastActive: Date.now() });
+        localStorage.setItem('role', 'commander');
+        localStorage.setItem('team', team);
+        localStorage.setItem('platoonId', platoonId);
+        localStorage.setItem('nick', platoon.name);
+        localStorage.setItem('joinToken', platoon.joinToken);
+        showMap();
+      } else {
+        alert('Неверный ID взвода или пароль');
+      }
+    };
+
+    function showMap() {
+      myRole = localStorage.getItem('role');
+      myTeam = localStorage.getItem('team');
+      myPlatoonId = localStorage.getItem('platoonId');
+      myName = localStorage.getItem('nick');
+      joinToken = localStorage.getItem('joinToken');
+
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mapScreen').classList.remove('hidden');
+      
+      const roleText = myRole === 'commander' ? `👑 Командир: ${myName}` : `👤 Солдат: ${myName}`;
+      document.getElementById('userRoleDisplay').innerText = roleText;
+
+      if (myRole === 'commander' && joinToken) {
+        document.getElementById('showQrBtn').classList.remove('hidden');
+        const joinUrl = `${window.location.origin}/index.html?action=join&team=${myTeam}&platoon=${myPlatoonId}&token=${joinToken}`;
+        document.getElementById('cmdQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(joinUrl)}`;
+      }
+
+      onValue(ref(db, 'players'), (snapshot) => {
+        playersData = snapshot.val() || {};
+        renderMap();
+      });
+
+      onValue(ref(db, 'platoons'), (snapshot) => {
+        platoonsData = snapshot.val() || {};
+        renderMap();
+      });
     }
 
-    function initMap() {
-      map = L.map('map').setView([55.75, 37.61], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+    function renderMap() {
+      const list = document.getElementById('entitiesList');
+      list.innerHTML = '';
 
-      db.ref('players/' + myTeam + '/' + playerId).on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        if (data.kicked) {
-          document.getElementById('kick-message').innerText = data.kickReason || "Вы выгнаны из игры.";
-          document.getElementById('kick-modal').style.display = 'flex';
-          if (watchId) navigator.geolocation.clearWatch(watchId);
-          map.remove();
-        }
-        if (data.sos) {
-          document.getElementById('sos-btn').style.display = 'none';
-          document.getElementById('sos-active-modal').style.display = 'block';
-        } else {
-          document.getElementById('sos-btn').style.display = 'block';
-          document.getElementById('sos-active-modal').style.display = 'none';
-        }
-      });
-
-      db.ref('players/' + myTeam).on('value', (snapshot) => {
-        const players = snapshot.val() || {};
-        for (const id in markers) {
-          if (!players[id] || players[id].kicked) map.removeLayer(markers[id]);
-        }
-        const icons = { red: '🔴', blue: '🔵', spec: '⚪' };
-        for (const id in players) {
-          const p = players[id];
-          if (p.kicked || Date.now() - p.timestamp > 300000) continue;
-          if (!p.lat || !p.lng) continue;
-          const icon = L.divIcon({ className: 'my-location', html: `<div style="font-size:24px;text-align:center">${icons[myTeam] || '⚪'}</div>`, iconSize: [30, 30] });
-          if (!markers[id]) markers[id] = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`<b>${p.nick}</b>`);
-          else markers[id].setLatLng([p.lat, p.lng]);
-        }
-      });
-
-      if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition((pos) => {
-          db.ref('players/' + myTeam + '/' + playerId).update({
-            nick: myNick, lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now()
-          });
-          if (!map._initialCenter) {
-            map.setView([pos.coords.latitude, pos.coords.longitude], 15);
-            map._initialCenter = true;
+      if (myRole === 'soldier') {
+        for (const team in platoonsData) {
+          if (team === myTeam) {
+            for (const pId in platoonsData[team]) {
+              const cmd = platoonsData[team][pId];
+              list.innerHTML += `<div style="color:blue; font-weight:bold;">👑 ${cmd.name} (Взвод: ${pId})</div>`;
+            }
           }
-        }, null, { enableHighAccuracy: true, maximumAge: 5000 });
+        }
+      } else if (myRole === 'commander') {
+        for (const pId in playersData[myTeam] || {}) {
+          const player = playersData[myTeam][pId];
+          if (player.platoonId === myPlatoonId) {
+            list.innerHTML += `<div>👤 ${player.nick} (Солдат)</div>`;
+          }
+        }
+        for (const pId in platoonsData[myTeam] || {}) {
+          const cmd = platoonsData[myTeam][pId];
+          list.innerHTML += `<div style="color:blue; font-weight:bold;">👑 ${cmd.name} (Командир)</div>`;
+        }
       }
     }
 
-    window.sendSOS = function() {
-      db.ref('players/' + myTeam + '/' + playerId).update({ sos: true, sosTime: Date.now() });
-      db.ref('logs').push({ timestamp: Date.now(), type: 'sos', message: `🚨 SOS от ${myNick} (${myTeam})! Требуется помощь.` });
+    window.sendSOS = async function() {
+      await push(ref(db, 'logs'), {
+        timestamp: Date.now(), type: 'sos', message: `🚨 SOS от ${myName} (${myTeam})`
+      });
+      alert('SOS отправлен организаторам!');
     };
 
-    window.cancelSOS = function() {
-      db.ref('players/' + myTeam + '/' + playerId).update({ sos: false, sosTime: null });
+    window.logout = function() {
+      localStorage.clear();
+      window.location.reload();
     };
   </script>
 </body>
