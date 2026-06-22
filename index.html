@@ -2,183 +2,675 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POLYGON // TACTICAL MAP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TARKOV // TACTICAL OPS</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  * { box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
   :root {
-    --bg: #0a0e0a; --bg2: #111614; --bg3: #1a2018;
-    --border: #2a3a2a; --accent: #d4a017;
-    --green: #4ade80; --red: #ef4444; --blue: #60a5fa;
-    --text: #c8d4c8; --dim: #6a7a6a;
-    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --bg: #0a0d08;
+    --bg2: #141812;
+    --bg3: #1e241a;
+    --border: #2a3020;
+    --accent: #d4a017;
+    --accent2: #f4c430;
+    --green: #4ade80;
+    --red: #ef4444;
+    --blue: #60a5fa;
+    --text: #c8d4c8;
+    --dim: #5a6a5a;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
   }
-  body { margin: 0; font-family: var(--mono); background: var(--bg); color: var(--text); overflow: hidden; }
-  #map { position: absolute; inset: 0; z-index: 1; background: #000; filter: saturate(0.3) brightness(0.7) contrast(1.1); }
-  .leaflet-container { background: #000 !important; font-family: var(--mono); }
-  .leaflet-popup-content-wrapper { background: var(--bg2); color: var(--text); border: 1px solid var(--accent); border-radius: 0; font-size: 12px; }
+  
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* ===== CRT + NOISE EFFECTS ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.15),
+      rgba(0,0,0,0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scan 8s linear infinite;
+  }
+  
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="3"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.03"/></svg>');
+    pointer-events: none;
+    z-index: 9998;
+  }
+  
+  @keyframes scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+  }
+  
+  /* ===== MAP ===== */
+  #map {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #000;
+    filter: saturate(0.2) brightness(0.6) contrast(1.2) sepia(0.3);
+  }
+  
+  .leaflet-container {
+    background: #000 !important;
+    font-family: var(--mono);
+  }
+  
+  .leaflet-popup-content-wrapper {
+    background: var(--bg2);
+    color: var(--text);
+    border: 2px solid var(--accent);
+    border-radius: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    box-shadow: 0 0 30px rgba(212,160,23,0.3);
+  }
+  
   .leaflet-popup-tip { background: var(--bg2); }
-  .leaflet-control-zoom a { background: var(--bg2) !important; color: var(--accent) !important; border: 1px solid var(--border) !important; }
-
-  #topBar {
-    position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
-    background: rgba(10,14,10,0.92); border-bottom: 1px solid var(--accent);
-    padding: 6px 12px; font-size: 11px;
-    display: flex; justify-content: space-between; align-items: center;
-    backdrop-filter: blur(4px); flex-wrap: wrap; gap: 6px;
+  
+  .leaflet-control-zoom a {
+    background: var(--bg2) !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--border) !important;
   }
-  #topBar .logo { color: var(--accent); font-weight: bold; letter-spacing: 2px; }
-  #topBar .stats { display: flex; gap: 12px; flex-wrap: wrap; }
-  #topBar .stat { color: var(--dim); }
-  #topBar .stat b { color: var(--green); }
-  #topBar .stat.red b { color: var(--red); }
-  #topBar .stat.blue b { color: var(--blue); }
-  #clock { color: var(--accent); }
-
+  
+  /* ===== TOP HUD ===== */
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, rgba(10,13,8,0.98) 0%, rgba(10,13,8,0.9) 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+  }
+  
+  #hud::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: glow 3s ease-in-out infinite;
+  }
+  
+  @keyframes glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  
+  .hud-logo {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(212,160,23,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .hud-logo::before {
+    content: '⚔';
+    font-size: 20px;
+  }
+  
+  .hud-stats {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  
+  .hud-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .hud-stat .label {
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  
+  .hud-stat .value {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .hud-stat.red .value { color: var(--red); }
+  .hud-stat.blue .value { color: var(--blue); }
+  .hud-stat.green .value { color: var(--green); }
+  
+  .hud-clock {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  
+  /* ===== PANEL ===== */
   .panel {
-    position: absolute; top: 44px; left: 10px; z-index: 1000;
-    background: rgba(10,14,10,0.95); border: 1px solid var(--accent);
-    width: 340px; max-height: calc(100vh - 55px);
-    overflow-y: auto; backdrop-filter: blur(6px);
-    box-shadow: 0 0 30px rgba(212,160,23,0.15);
+    position: absolute;
+    top: 70px;
+    left: 16px;
+    z-index: 1000;
+    background: rgba(10,13,8,0.96);
+    border: 2px solid var(--accent);
+    width: 360px;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.9), 0 0 60px rgba(212,160,23,0.1);
   }
+  
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  }
+  
   .panel-header {
-    background: var(--bg3); padding: 10px 14px;
-    border-bottom: 1px solid var(--accent);
-    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    padding: 14px 18px;
+    border-bottom: 2px solid var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
   }
-  .panel-header h2 { margin: 0; font-size: 13px; color: var(--accent); letter-spacing: 2px; }
-  .panel-header .close {
-    background: none; border: 1px solid var(--border); color: var(--dim);
-    width: 24px; height: 24px; cursor: pointer; font-family: var(--mono);
+  
+  .panel-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
   }
-  .panel-header .close:hover { color: var(--red); border-color: var(--red); }
-  .panel-body { padding: 14px; }
-
-  .section { border: 1px solid var(--border); margin-bottom: 12px; padding: 10px; background: var(--bg2); }
+  
+  .panel-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(212,160,23,0.3);
+  }
+  
+  .panel-close {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .panel-close:hover {
+    background: var(--red);
+    color: #fff;
+    border-color: var(--red);
+    box-shadow: 0 0 15px rgba(239,68,68,0.5);
+  }
+  
+  .panel-body {
+    padding: 18px;
+  }
+  
+  /* ===== SECTIONS ===== */
+  .section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent);
+  }
+  
+  .section-header {
+    background: linear-gradient(90deg, rgba(212,160,23,0.1) 0%, transparent 100%);
+    padding: 10px 14px 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .section-header::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 14px;
+  }
+  
   .section-title {
-    color: var(--accent); font-size: 11px; letter-spacing: 1px;
-    margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--border);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
-  .section-title::before { content: "// "; color: var(--dim); }
-
-  input, select, button {
-    width: 100%; padding: 8px 10px; margin: 4px 0;
-    background: var(--bg); color: var(--text); border: 1px solid var(--border);
-    font-family: var(--mono); font-size: 12px; outline: none;
+  
+  .section-body {
+    padding: 14px;
   }
-  input:focus, select:focus { border-color: var(--accent); }
+  
+  /* ===== FORMS ===== */
+  input, select, button, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    margin: 6px 0;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(212,160,23,0.2);
+  }
+  
+  input::placeholder { color: var(--dim); }
+  
   button {
-    background: var(--bg3); color: var(--accent); cursor: pointer;
-    letter-spacing: 1px; text-transform: uppercase; font-weight: bold;
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
   }
-  button:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  button.danger { color: var(--red); border-color: #5a2020; }
-  button.danger:hover { background: var(--red); color: #fff; }
-  button.warn { color: #fbbf24; border-color: #5a4020; }
-  button.warn:hover { background: #fbbf24; color: #000; }
-
+  
+  button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212,160,23,0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  button:hover::before { left: 100%; }
+  
+  button:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(212,160,23,0.4);
+  }
+  
+  button.danger {
+    color: var(--red);
+    border-color: var(--red);
+  }
+  
+  button.danger:hover {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(239,68,68,0.5);
+  }
+  
+  button.warn {
+    color: #fbbf24;
+    border-color: #fbbf24;
+  }
+  
+  button.warn:hover {
+    background: #fbbf24;
+    color: #000;
+  }
+  
+  button.success {
+    color: var(--green);
+    border-color: var(--green);
+  }
+  
+  button.success:hover {
+    background: var(--green);
+    color: #000;
+  }
+  
   .hidden { display: none !important; }
-  .poi-icon, .soldier-icon, .flag-icon { background: none !important; border: none !important; }
+  
+  /* ===== MARKERS ===== */
+  .poi-icon, .soldier-icon, .flag-icon {
+    background: none !important;
+    border: none !important;
+  }
+  
   .poi-marker {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px; background: rgba(10,14,10,0.85);
-    border: 1px solid var(--accent); border-radius: 50%;
-    box-shadow: 0 0 10px rgba(212,160,23,0.4);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: rgba(10,13,8,0.9);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(212,160,23,0.5);
+    animation: markerPulse 3s ease-in-out infinite;
   }
+  
+  @keyframes markerPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(212,160,23,0.5); }
+    50% { box-shadow: 0 0 25px rgba(212,160,23,0.8); }
+  }
+  
   .flag-marker {
-    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-    font-size: 26px; background: rgba(10,14,10,0.9);
-    border: 2px solid var(--accent); border-radius: 50%;
-    animation: flagPulse 2s infinite;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: rgba(10,13,8,0.95);
+    border: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: flagGlow 2s ease-in-out infinite;
   }
-  .flag-marker.red { border-color: var(--red); box-shadow: 0 0 15px var(--red); }
-  .flag-marker.blue { border-color: var(--blue); box-shadow: 0 0 15px var(--blue); }
-  @keyframes flagPulse {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+  
+  .flag-marker.red {
+    border-color: var(--red);
+    box-shadow: 0 0 20px var(--red);
   }
+  
+  .flag-marker.blue {
+    border-color: var(--blue);
+    box-shadow: 0 0 20px var(--blue);
+  }
+  
+  @keyframes flagGlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  
   .soldier-marker {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    font-size: 16px; border-radius: 50%; border: 2px solid #fff;
-    box-shadow: 0 0 8px rgba(0,0,0,0.8);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 12px rgba(0,0,0,0.8);
   }
+  
   .soldier-marker.red { background: var(--red); }
   .soldier-marker.blue { background: var(--blue); }
-  .soldier-marker.sos { animation: pulse 0.8s infinite; background: #fff !important; color: var(--red); }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.8); }
-    50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+  
+  .soldier-marker.sos {
+    animation: sosPulse 0.6s infinite;
+    background: #fff !important;
+    color: var(--red);
   }
-  .radius-circle { stroke: var(--accent); stroke-dasharray: 5,5; fill: rgba(212,160,23,0.05); }
-
+  
+  @keyframes sosPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(239,68,68,0.9);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 15px rgba(239,68,68,0);
+      transform: scale(1.1);
+    }
+  }
+  
+  .radius-circle {
+    stroke: var(--accent);
+    stroke-dasharray: 8,4;
+    fill: rgba(212,160,23,0.05);
+    stroke-width: 2;
+  }
+  
+  /* ===== LISTS ===== */
   .list-item {
-    padding: 6px 8px; margin: 3px 0; background: var(--bg);
-    border-left: 2px solid var(--border); font-size: 11px;
-    display: flex; justify-content: space-between;
+    background: var(--bg);
+    border-left: 3px solid var(--border);
+    padding: 10px 12px;
+    margin: 6px 0;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
   }
+  
+  .list-item:hover {
+    background: var(--bg2);
+    border-left-color: var(--accent);
+  }
+  
   .list-item.red { border-left-color: var(--red); }
   .list-item.blue { border-left-color: var(--blue); }
-  .list-item .status { color: var(--dim); font-size: 10px; }
-  .list-item .status.sos { color: var(--red); font-weight: bold; }
-
+  
+  .list-item .name {
+    font-family: var(--sans);
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .list-item .status {
+    color: var(--dim);
+    font-size: 10px;
+    font-family: var(--mono);
+    letter-spacing: 1px;
+  }
+  
+  .list-item .status.sos {
+    color: var(--red);
+    font-weight: bold;
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    50% { opacity: 0.3; }
+  }
+  
+  /* ===== TOGGLE BUTTON ===== */
   #togglePanel {
-    position: absolute; top: 44px; left: 10px; z-index: 999;
-    width: 36px; height: 36px; background: var(--bg2);
-    border: 1px solid var(--accent); color: var(--accent);
-    cursor: pointer; font-family: var(--mono); font-size: 16px;
+    position: absolute;
+    top: 80px;
+    left: 16px;
+    z-index: 999;
+    width: 42px;
+    height: 42px;
+    background: var(--bg2);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 18px;
+    transition: all 0.2s;
   }
-
+  
+  #togglePanel:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(212,160,23,0.5);
+  }
+  
+  /* ===== QR MODAL ===== */
   #qrModal {
-    position: fixed; inset: 0; z-index: 2000;
-    background: rgba(0,0,0,0.92);
-    display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(6px);
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
   }
+  
   #qrModal .box {
-    background: var(--bg2); border: 1px solid var(--accent);
-    padding: 20px; max-width: 340px; text-align: center;
+    background: var(--bg2);
+    border: 3px solid var(--accent);
+    padding: 30px;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(212,160,23,0.3);
   }
-  #qrModal h3 { color: var(--accent); margin: 0 0 12px; font-size: 13px; letter-spacing: 2px; }
-  #qrModal img { background: #fff; padding: 8px; max-width: 100%; }
+  
+  #qrModal h3 {
+    color: var(--accent);
+    margin: 0 0 16px;
+    font-family: var(--sans);
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  
+  #qrModal img {
+    background: #fff;
+    padding: 12px;
+    max-width: 100%;
+    border: 2px solid var(--accent);
+  }
+  
   #qrModal .link {
-    font-size: 10px; color: var(--dim); word-break: break-all;
-    margin-top: 10px; padding: 6px; background: var(--bg); border: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--dim);
+    word-break: break-all;
+    margin: 14px 0;
+    padding: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
   }
-
-  /* ===== УВЕДОМЛЕНИЯ ===== */
+  
+  /* ===== NOTIFICATIONS ===== */
   #notifications {
-    position: fixed; top: 50px; right: 10px; z-index: 3000;
-    display: flex; flex-direction: column; gap: 8px;
-    max-width: 340px; pointer-events: none;
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+    pointer-events: none;
   }
+  
   .notif {
-    background: var(--bg2); border-left: 4px solid var(--accent);
-    padding: 12px 16px; font-size: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    animation: slideIn 0.3s, fadeOut 0.5s 4.5s forwards;
+    background: var(--bg2);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    font-size: 12px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.8);
+    animation: slideIn 0.4s, fadeOut 0.6s 4.4s forwards;
     pointer-events: auto;
+    border: 1px solid var(--border);
   }
-  .notif.capture { border-left-color: var(--green); }
-  .notif.broadcast { border-left-color: var(--blue); }
-  .notif.sos { border-left-color: var(--red); }
-  .notif .title { color: var(--accent); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+  
+  .notif.capture { border-left-color: var(--green); border-color: var(--green); }
+  .notif.broadcast { border-left-color: var(--blue); border-color: var(--blue); }
+  .notif.sos { border-left-color: var(--red); border-color: var(--red); }
+  
+  .notif .title {
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+  
   .notif.capture .title { color: var(--green); }
   .notif.broadcast .title { color: var(--blue); }
   .notif.sos .title { color: var(--red); }
-  @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes fadeOut { to { opacity: 0; transform: translateX(400px); } }
-
-  ::-webkit-scrollbar { width: 6px; }
+  
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateX(400px); }
+  }
+  
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-  @media (max-width: 600px) {
-    .panel { width: calc(100% - 20px); }
-    #topBar { font-size: 10px; padding: 4px 8px; }
-    #topBar .stats { gap: 6px; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+  
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .panel { width: calc(100% - 32px); }
+    #hud { padding: 8px 12px; }
+    .hud-stats { gap: 12px; font-size: 10px; }
+    .hud-stat .value { font-size: 12px; }
+    .hud-logo { font-size: 14px; }
   }
 </style>
 </head>
@@ -186,101 +678,157 @@
 
 <div id="map"></div>
 
-<div id="topBar">
-  <div class="logo">◢ POLYGON ◣</div>
-  <div class="stats">
-    <span class="stat">ИГРА: <b id="gameStatus">ОЖИДАНИЕ</b></span>
-    <span class="stat">⏱ <b id="gameTimer">00:00</b></span>
-    <span class="stat red">🔴 <b id="redScore">0</b></span>
-    <span class="stat blue">🔵 <b id="blueScore">0</b></span>
-    <span class="stat red">КР: <b id="redCount">0</b></span>
-    <span class="stat blue">СН: <b id="blueCount">0</b></span>
-    <span class="stat" id="coordStat">GPS: <b>--</b></span>
-    <span id="clock">--:--:--</span>
+<!-- ===== HUD ===== -->
+<div id="hud">
+  <div class="hud-logo">TARKOV OPS</div>
+  <div class="hud-stats">
+    <div class="hud-stat">
+      <span class="label">СТАТУС</span>
+      <span class="value" id="gameStatus">ОЖИДАНИЕ</span>
+    </div>
+    <div class="hud-stat">
+      <span class="label">ТАЙМЕР</span>
+      <span class="value" id="gameTimer">00:00</span>
+    </div>
+    <div class="hud-stat red">
+      <span class="label">КРАСНЫЕ</span>
+      <span class="value"><span id="redScore">0</span> / <span id="redCount">0</span></span>
+    </div>
+    <div class="hud-stat blue">
+      <span class="label">СИНИЕ</span>
+      <span class="value"><span id="blueScore">0</span> / <span id="blueCount">0</span></span>
+    </div>
+    <div class="hud-stat green">
+      <span class="label">GPS</span>
+      <span class="value" id="coordStat">---</span>
+    </div>
+    <div class="hud-clock" id="clock">--:--:--</div>
   </div>
 </div>
 
-<button id="togglePanel" class="hidden" onclick="document.getElementById('sidePanel').classList.remove('hidden');this.classList.add('hidden')">◢</button>
+<button id="togglePanel" class="hidden" onclick="document.getElementById('sidePanel').classList.remove('hidden');this.classList.add('hidden')">☰</button>
 
 <div id="notifications"></div>
 
+<!-- ===== PANEL ===== -->
 <div class="panel" id="sidePanel">
   <div class="panel-header">
-    <h2>◢ ОПЕРАТОР ◣</h2>
-    <button class="close" onclick="document.getElementById('sidePanel').classList.add('hidden');document.getElementById('togglePanel').classList.remove('hidden')">✕</button>
+    <div class="panel-title">ОПЕРАТОР</div>
+    <button class="panel-close" onclick="document.getElementById('sidePanel').classList.add('hidden');document.getElementById('togglePanel').classList.remove('hidden')">✕</button>
   </div>
   <div class="panel-body">
 
+    <!-- LOGIN -->
     <div id="loginPanel">
       <div class="section">
-        <div class="section-title">ВХОД НА ПОЛИГОН</div>
-        <div style="color:var(--dim);font-size:10px;margin-bottom:8px;">// Авторизуйтесь для подключения</div>
+        <div class="section-header">
+          <div class="section-title">ВХОД В ЗОНУ БОЯ</div>
+        </div>
+        <div class="section-body">
+          <div style="color:var(--dim);font-size:11px;margin-bottom:12px;font-family:var(--mono);">
+            // Авторизуйтесь для подключения к тактической сети
+          </div>
+        </div>
       </div>
+
       <div class="section">
-        <div class="section-title">ВСТУПЛЕНИЕ ПО QR</div>
-        <input type="text" id="joinCode" placeholder="Код взвода">
-        <button onclick="joinByCode()">▸ Вступить</button>
+        <div class="section-header">
+          <div class="section-title">QR-ВСТУПЛЕНИЕ</div>
+        </div>
+        <div class="section-body">
+          <input type="text" id="joinCode" placeholder="КОД ВЗВОДА">
+          <button onclick="joinByCode()">▸ ВСТУПИТЬ</button>
+        </div>
       </div>
+
       <div class="section">
-        <div class="section-title">СОЛДАТ</div>
-        <input type="text" id="soldierName" placeholder="Позывной">
-        <select id="soldierTeam">
-          <option value="red">🔴 КРАСНЫЕ</option>
-          <option value="blue">🔵 СИНИЕ</option>
-        </select>
-        <button onclick="loginSoldier()">▸ Войти как солдат</button>
+        <div class="section-header">
+          <div class="section-title">СОЛДАТ</div>
+        </div>
+        <div class="section-body">
+          <input type="text" id="soldierName" placeholder="ПОЗЫВНОЙ">
+          <select id="soldierTeam">
+            <option value="red">🔴 КРАСНЫЕ</option>
+            <option value="blue">🔵 СИНИЕ</option>
+          </select>
+          <button onclick="loginSoldier()">▸ ВОЙТИ КАК СОЛДАТ</button>
+        </div>
       </div>
+
       <div class="section">
-        <div class="section-title">КОМАНДИР ВЗВОДА</div>
-        <input type="text" id="cmdSquad" placeholder="ID взвода">
-        <select id="cmdTeam">
-          <option value="red">🔴 КРАСНЫЕ</option>
-          <option value="blue">🔵 СИНИЕ</option>
-        </select>
-        <button onclick="loginCommander()">▸ Войти как командир</button>
+        <div class="section-header">
+          <div class="section-title">КОМАНДИР</div>
+        </div>
+        <div class="section-body">
+          <input type="text" id="cmdSquad" placeholder="ID ВЗВОДА">
+          <select id="cmdTeam">
+            <option value="red">🔴 КРАСНЫЕ</option>
+            <option value="blue">🔵 СИНИЕ</option>
+          </select>
+          <button onclick="loginCommander()">▸ ВОЙТИ КАК КОМАНДИР</button>
+        </div>
       </div>
     </div>
 
+    <!-- SOLDIER -->
     <div id="soldierPanel" class="hidden">
       <div class="section">
-        <div class="section-title">ОПЕРАТОР</div>
-        <div style="font-size:13px;">
-          <span style="color:var(--accent)">ПОЗЫВНОЙ:</span> <b id="sName"></b> <span id="sTeam"></span><br>
-          <span style="color:var(--accent)">ВЗВОД:</span> <b id="sSquad"></b><br>
-          <span style="color:var(--accent)">СТАТУС:</span> <span id="sStatus" style="color:var(--green)">В СТРОЮ</span>
+        <div class="section-header">
+          <div class="section-title">ОПЕРАТОР</div>
+        </div>
+        <div class="section-body">
+          <div style="font-size:13px;line-height:1.8;">
+            <div><span style="color:var(--accent);font-weight:600;">ПОЗЫВНОЙ:</span> <b id="sName"></b> <span id="sTeam"></span></div>
+            <div><span style="color:var(--accent);font-weight:600;">ВЗВОД:</span> <b id="sSquad"></b></div>
+            <div><span style="color:var(--accent);font-weight:600;">СТАТУС:</span> <span id="sStatus" style="color:var(--green)">В СТРОЮ</span></div>
+          </div>
         </div>
       </div>
       <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
       <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
       <div class="section">
-        <div class="section-title">ОБЪЕКТЫ В ЗОНЕ</div>
-        <div id="visibleList"><div style="color:var(--dim);font-size:11px">// Нет данных</div></div>
+        <div class="section-header">
+          <div class="section-title">ОБЪЕКТЫ В ЗОНЕ</div>
+        </div>
+        <div class="section-body">
+          <div id="visibleList"><div style="color:var(--dim);font-size:11px;font-family:var(--mono);">// Нет данных</div></div>
+        </div>
       </div>
     </div>
 
+    <!-- COMMANDER -->
     <div id="commanderPanel" class="hidden">
       <div class="section">
-        <div class="section-title">КОМАНДИР</div>
-        <div style="font-size:13px;">
-          <span style="color:var(--accent)">КОМАНДУЮ:</span> <span id="cTeam"></span><br>
-          <span style="color:var(--accent)">ВЗВОД:</span> <b id="cSquad"></b>
+        <div class="section-header">
+          <div class="section-title">КОМАНДИР</div>
+        </div>
+        <div class="section-body">
+          <div style="font-size:13px;line-height:1.8;">
+            <div><span style="color:var(--accent);font-weight:600;">КОМАНДУЮ:</span> <span id="cTeam"></span></div>
+            <div><span style="color:var(--accent);font-weight:600;">ВЗВОД:</span> <b id="cSquad"></b></div>
+          </div>
         </div>
       </div>
       <button onclick="showQR()">📱 QR ДЛЯ БОЙЦОВ</button>
       <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
       <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
       <div class="section">
-        <div class="section-title">БОЙЦЫ ВЗВОДА</div>
-        <div id="squadList"><div style="color:var(--dim);font-size:11px">// Нет бойцов</div></div>
+        <div class="section-header">
+          <div class="section-title">БОЙЦЫ ВЗВОДА</div>
+        </div>
+        <div class="section-body">
+          <div id="squadList"><div style="color:var(--dim);font-size:11px;font-family:var(--mono);">// Нет бойцов</div></div>
+        </div>
       </div>
     </div>
 
   </div>
 </div>
 
+<!-- ===== QR MODAL ===== -->
 <div id="qrModal" class="hidden">
   <div class="box">
-    <h3>◢ QR ДЛЯ ВСТУПЛЕНИЯ ◣</h3>
+    <h3>QR ДЛЯ ВСТУПЛЕНИЯ</h3>
     <img id="qrImg" src="">
     <div class="link" id="qrLink"></div>
     <button onclick="document.getElementById('qrModal').classList.add('hidden')">✕ ЗАКРЫТЬ</button>
@@ -309,17 +857,17 @@ let watchId = null;
 let myCoords = null;
 let listeners = [];
 let gameTimerInterval = null;
-let capturedFlags = new Set(); // уже захваченные мной
+let capturedFlags = new Set();
 
 const teamEmoji = { red: '🔴', blue: '🔵' };
 const poiIcons = { flag: '🚩', ammo: '📦', medic: '🏥', danger: '⚠️', base: '🏠' };
 
-// ===== ЧАСЫ =====
+// ===== CLOCK =====
 setInterval(() => {
   document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
 }, 1000);
 
-// ===== УВЕДОМЛЕНИЯ =====
+// ===== NOTIFICATIONS =====
 function notify(title, text, type = '') {
   const box = document.getElementById('notifications');
   const n = document.createElement('div');
@@ -329,7 +877,7 @@ function notify(title, text, type = '') {
   setTimeout(() => n.remove(), 5000);
 }
 
-// ===== ВХОД =====
+// ===== LOGIN =====
 function loginSoldier() {
   const name = document.getElementById('soldierName').value.trim();
   const team = document.getElementById('soldierTeam').value;
@@ -377,9 +925,9 @@ function startSession() {
   startGeolocation();
   subscribeToPOIs();
   subscribeToSoldiers();
-  subscribeToGame();       // ← ТАЙМЕР + СЧЁТ
-  subscribeToBroadcasts(); // ← ВЕЩАНИЯ
-  subscribeToCaptures();   // ← ЗАХВАТЫ ФЛАГОВ
+  subscribeToGame();
+  subscribeToBroadcasts();
+  subscribeToCaptures();
 }
 
 function logout() {
@@ -402,23 +950,23 @@ function registerPlayer() {
   ref.onDisconnect().update({ status: 'offline', updatedAt: Date.now() });
 }
 
-// ===== ГЕОЛОКАЦИЯ =====
+// ===== GEOLOCATION =====
 function startGeolocation() {
   if (!navigator.geolocation) return alert('// GPS НЕ ПОДДЕРЖИВАЕТСЯ');
   watchId = navigator.geolocation.watchPosition(pos => {
     const { latitude: lat, longitude: lng } = pos.coords;
     myCoords = { lat, lng };
     db.ref('players/' + me.id).update({ lat, lng, updatedAt: Date.now() });
-    document.getElementById('coordStat').innerHTML = `GPS: <b>${lat.toFixed(4)}, ${lng.toFixed(4)}</b>`;
+    document.getElementById('coordStat').innerHTML = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     if (map.getZoom() < 14) map.setView([lat, lng], 16);
-    checkFlagCapture(); // ← проверка захвата
+    checkFlagCapture();
   }, err => {
     console.warn('// GPS ERR:', err);
-    document.getElementById('coordStat').innerHTML = `GPS: <b style="color:var(--red)">ОШИБКА</b>`;
+    document.getElementById('coordStat').innerHTML = `<span style="color:var(--red)">ОШИБКА</span>`;
   }, { enableHighAccuracy: true, maximumAge: 3000 });
 }
 
-// ===== POI (обычные точки) =====
+// ===== POI =====
 function subscribeToPOIs() {
   const ref = db.ref('pois');
   listeners.push({ ref });
@@ -428,11 +976,11 @@ function subscribeToPOIs() {
     snap.forEach(ch => {
       const p = ch.val();
       if (p.team !== 'all' && p.team !== me.team) return;
-      if (p.type === 'flag') return; // флаги — в отдельный слой
+      if (p.type === 'flag') return;
 
       const icon = L.divIcon({
         html: `<div class="poi-marker">${poiIcons[p.type] || '📍'}</div>`,
-        className: 'poi-icon', iconSize: [32, 32], iconAnchor: [16, 16]
+        className: 'poi-icon', iconSize: [36, 36], iconAnchor: [18, 18]
       });
       L.marker([p.lat, p.lng], { icon })
         .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br><span style="color:var(--dim)">${p.type.toUpperCase()} | ${p.team.toUpperCase()}</span><br>${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`)
@@ -448,7 +996,7 @@ function subscribeToPOIs() {
   });
 }
 
-// ===== ФЛАГИ (отдельный слой + захват) =====
+// ===== FLAGS =====
 let flagsData = {};
 function subscribeFlags() {
   const ref = db.ref('pois');
@@ -465,7 +1013,7 @@ function subscribeFlags() {
       const cls = owner === 'red' ? 'red' : (owner === 'blue' ? 'blue' : '');
       const icon = L.divIcon({
         html: `<div class="flag-marker ${cls}">🚩</div>`,
-        className: 'flag-icon', iconSize: [40, 40], iconAnchor: [20, 20]
+        className: 'flag-icon', iconSize: [44, 44], iconAnchor: [22, 22]
       });
       const marker = L.marker([p.lat, p.lng], { icon })
         .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>🚩 ФЛАГ<br>Владелец: <b>${owner === 'neutral' ? 'НЕЙТРАЛЬНЫЙ' : owner.toUpperCase()}</b><br>Радиус: ${p.radius || 50}м`)
@@ -481,7 +1029,7 @@ function subscribeFlags() {
   });
 }
 
-// ===== ЗАХВАТ ФЛАГОВ =====
+// ===== FLAG CAPTURE =====
 function checkFlagCapture() {
   if (!myCoords) return;
   Object.entries(flagsData).forEach(([key, f]) => {
@@ -489,7 +1037,6 @@ function checkFlagCapture() {
     if (f.team !== 'all' && f.team !== me.team) return;
     const dist = distance(myCoords.lat, myCoords.lng, f.lat, f.lng);
     if (dist <= f.radius && f.capturedBy !== me.team) {
-      // Захватываем флаг
       db.ref('pois/' + key + '/capturedBy').set(me.team);
       db.ref('game/scores/' + me.team).transaction(v => (v || 0) + 1);
       db.ref('game/captures').push({
@@ -512,7 +1059,7 @@ function distance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ===== СОЛДАТЫ =====
+// ===== SOLDIERS =====
 function subscribeToSoldiers() {
   const ref = db.ref('players');
   listeners.push({ ref });
@@ -535,7 +1082,7 @@ function subscribeToSoldiers() {
       const cls = isSOS ? 'sos' : p.team;
       const icon = L.divIcon({
         html: `<div class="soldier-marker ${cls}">${isSOS ? '🆘' : marker}</div>`,
-        className: 'soldier-icon', iconSize: [32, 32], iconAnchor: [16, 16]
+        className: 'soldier-icon', iconSize: [36, 36], iconAnchor: [18, 18]
       });
       L.marker([p.lat, p.lng], { icon })
         .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>${p.role.toUpperCase()}<br>Статус: <span style="color:${isSOS?'var(--red)':'var(--green)'}">${p.status.toUpperCase()}</span>`)
@@ -543,19 +1090,18 @@ function subscribeToSoldiers() {
 
       const div = document.createElement('div');
       div.className = 'list-item ' + p.team;
-      div.innerHTML = `<span>${marker} ${p.name}</span><span class="status ${isSOS?'sos':''}">${p.status.toUpperCase()}</span>`;
+      div.innerHTML = `<span class="name">${marker} ${p.name}</span><span class="status ${isSOS?'sos':''}">${p.status.toUpperCase()}</span>`;
       listEl.appendChild(div);
     });
 
     document.getElementById('redCount').textContent = redC;
     document.getElementById('blueCount').textContent = blueC;
-    if (!listEl.children.length) listEl.innerHTML = '<div style="color:var(--dim);font-size:11px">// Нет данных</div>';
+    if (!listEl.children.length) listEl.innerHTML = '<div style="color:var(--dim);font-size:11px;font-family:var(--mono);">// Нет данных</div>';
   });
 }
 
-// ===== ИГРА (таймер + счёт + статус) =====
+// ===== GAME =====
 function subscribeToGame() {
-  // Статус игры
   db.ref('game/status').on('value', snap => {
     const s = snap.val() || 'waiting';
     const el = document.getElementById('gameStatus');
@@ -563,7 +1109,6 @@ function subscribeToGame() {
     el.style.color = s === 'running' ? 'var(--green)' : (s === 'ended' ? 'var(--red)' : 'var(--accent)');
   });
 
-  // Таймер
   db.ref('game/timer').on('value', snap => {
     const t = snap.val();
     if (!t) return;
@@ -591,7 +1136,6 @@ function subscribeToGame() {
     }
   });
 
-  // Счёт
   db.ref('game/scores').on('value', snap => {
     const s = snap.val() || {};
     document.getElementById('redScore').textContent = s.red || 0;
@@ -599,23 +1143,19 @@ function subscribeToGame() {
   });
 }
 
-// ===== ВЕЩАНИЯ =====
-let lastBroadcastId = null;
+// ===== BROADCASTS =====
 function subscribeToBroadcasts() {
   db.ref('game/broadcasts').limitToLast(1).on('child_added', snap => {
     const b = snap.val();
     if (!b) return;
-    // Фильтр по получателю
     if (b.target !== 'all' && b.target !== me.team) return;
     if (me.role === 'commander' && b.targetSquad && b.targetSquad !== me.squad) return;
-    // Не показываем свои же
     if (b.from === me.id) return;
-
     notify('📡 ВЕЩАНИЕ', b.message, 'broadcast');
   });
 }
 
-// ===== ЗАХВАТЫ (уведомления о чужих захватах) =====
+// ===== CAPTURES =====
 function subscribeToCaptures() {
   db.ref('game/captures').limitToLast(1).on('child_added', snap => {
     const c = snap.val();
@@ -645,7 +1185,7 @@ function showQR() {
   });
 }
 
-// ===== АВТОВХОД =====
+// ===== AUTO JOIN =====
 const params = new URLSearchParams(location.search);
 if (params.get('squad')) document.getElementById('joinCode').value = params.get('squad');
 
@@ -654,7 +1194,6 @@ if (saved) {
   try { me = JSON.parse(saved); startSession(); } catch(e) {}
 }
 
-// Запуск подписки на флаги (отдельно, т.к. нужна для захвата)
 const flagsRef = db.ref('pois');
 listeners.push({ ref: flagsRef });
 flagsRef.on('value', snap => {
@@ -670,7 +1209,7 @@ flagsRef.on('value', snap => {
     const cls = owner === 'red' ? 'red' : (owner === 'blue' ? 'blue' : '');
     const icon = L.divIcon({
       html: `<div class="flag-marker ${cls}">🚩</div>`,
-      className: 'flag-icon', iconSize: [40, 40], iconAnchor: [20, 20]
+      className: 'flag-icon', iconSize: [44, 44], iconAnchor: [22, 22]
     });
     L.marker([p.lat, p.lng], { icon })
       .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>🚩 ФЛАГ<br>Владелец: <b>${owner === 'neutral' ? 'НЕЙТРАЛЬНЫЙ' : owner.toUpperCase()}</b><br>Радиус: ${p.radius || 50}м`)

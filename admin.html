@@ -3,384 +3,826 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POLYGON // ADMIN</title>
+<title>TARKOV // COMMAND CENTER</title>
 <style>
-  * { box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
   :root {
-    --bg: #0a0e0a; --bg2: #111614; --bg3: #1a2018;
-    --border: #2a3a2a; --accent: #d4a017;
-    --green: #4ade80; --red: #ef4444; --blue: #60a5fa;
-    --text: #c8d4c8; --dim: #6a7a6a;
-    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --bg: #0a0d08;
+    --bg2: #141812;
+    --bg3: #1e241a;
+    --border: #2a3020;
+    --accent: #d4a017;
+    --accent2: #f4c430;
+    --green: #4ade80;
+    --red: #ef4444;
+    --blue: #60a5fa;
+    --text: #c8d4c8;
+    --dim: #5a6a5a;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
   }
+  
   body {
-    margin: 0; font-family: var(--mono);
-    background: var(--bg); color: var(--text);
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
+    position: relative;
   }
-
+  
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.12),
+      rgba(0,0,0,0.12) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scan 10s linear infinite;
+  }
+  
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence baseFrequency="0.8" numOctaves="3"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.04"/></svg>');
+    pointer-events: none;
+    z-index: 9998;
+  }
+  
+  @keyframes scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+  }
+  
   /* ===== TOP BAR ===== */
   #topBar {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(10,14,10,0.95);
-    border-bottom: 1px solid var(--accent);
-    padding: 8px 16px; font-size: 11px;
-    display: flex; justify-content: space-between; align-items: center;
-    backdrop-filter: blur(6px); flex-wrap: wrap; gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(10,13,8,0.98) 0%, rgba(10,13,8,0.92) 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.8);
   }
-  #topBar .logo {
-    color: var(--accent); font-weight: bold; letter-spacing: 2px;
-    display: flex; align-items: center; gap: 8px;
+  
+  #topBar::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: glow 3s ease-in-out infinite;
   }
-  #topBar .logo::before {
-    content: '🛡️'; font-size: 16px;
+  
+  @keyframes glow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
   }
-  #topBar .stats { display: flex; gap: 14px; flex-wrap: wrap; }
-  #topBar .stat { color: var(--dim); }
-  #topBar .stat b { color: var(--green); }
-  #topBar .stat.red b { color: var(--red); }
-  #topBar .stat.blue b { color: var(--blue); }
-  #topBar .live {
-    color: var(--green); font-size: 10px;
-    display: flex; align-items: center; gap: 4px;
-  }
-  #topBar .live::before {
-    content: ''; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); animation: blink 1.5s infinite;
-  }
-  @keyframes blink { 50% { opacity: 0.3; } }
-
-  /* ===== КОНТЕЙНЕР ===== */
-  .container {
-    max-width: 1200px; margin: 0 auto; padding: 16px;
-  }
-
-  /* ===== ТАБЫ ===== */
-  .tabs {
-    display: flex; gap: 2px; margin-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-  }
-  .tab {
-    padding: 10px 16px; cursor: pointer;
-    background: var(--bg2); color: var(--dim);
-    border: 1px solid var(--border); border-bottom: none;
-    font-family: var(--mono); font-size: 12px;
-    letter-spacing: 1px; text-transform: uppercase;
-    white-space: nowrap;
-  }
-  .tab:hover { color: var(--accent); }
-  .tab.active {
-    background: var(--bg3); color: var(--accent);
-    border-color: var(--accent); border-bottom: 1px solid var(--bg3);
-    margin-bottom: -1px;
-  }
-  .tab.danger { color: var(--red); }
-  .tab.danger.active { border-color: var(--red); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* ===== СЕКЦИИ ===== */
-  .section {
-    background: var(--bg2); border: 1px solid var(--border);
-    padding: 16px; margin-bottom: 16px;
-  }
-  .section-title {
-    color: var(--accent); font-size: 12px;
-    letter-spacing: 2px; margin: 0 0 12px;
-    padding-bottom: 8px; border-bottom: 1px dashed var(--border);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .section-title::before { content: '//'; color: var(--dim); }
-
-  /* ===== ФОРМЫ ===== */
-  input, select, button, textarea {
-    width: 100%; padding: 9px 12px; margin: 4px 0;
-    background: var(--bg); color: var(--text);
-    border: 1px solid var(--border);
-    font-family: var(--mono); font-size: 12px;
-    outline: none;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  button {
-    background: var(--bg3); color: var(--accent); cursor: pointer;
-    letter-spacing: 1px; text-transform: uppercase; font-weight: bold;
-    transition: all 0.15s;
-  }
-  button:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  button.danger { color: var(--red); border-color: #5a2020; }
-  button.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
-  button.warn { color: #fbbf24; border-color: #5a4020; }
-  button.warn:hover { background: #fbbf24; color: #000; }
-  button.success { color: var(--green); border-color: #205a20; }
-  button.success:hover { background: var(--green); color: #000; }
-
-  .form-row { display: flex; gap: 8px; }
-  .form-row > * { flex: 1; }
-
-  /* ===== СПИСКИ ===== */
-  .item {
-    background: var(--bg); border-left: 3px solid var(--accent);
-    padding: 10px 12px; margin: 6px 0; font-size: 12px;
-    display: flex; justify-content: space-between; align-items: center;
+  
+  .logo {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(212,160,23,0.4);
+    display: flex;
+    align-items: center;
     gap: 10px;
   }
+  
+  .logo::before {
+    content: '🛡️';
+    font-size: 22px;
+  }
+  
+  .stats {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .stat .label {
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  
+  .stat .value {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  
+  .stat.red .value { color: var(--red); }
+  .stat.blue .value { color: var(--blue); }
+  .stat.green .value { color: var(--green); }
+  
+  .live {
+    color: var(--green);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 1px;
+  }
+  
+  .live::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 1.5s infinite;
+    box-shadow: 0 0 10px var(--green);
+  }
+  
+  @keyframes blink {
+    50% { opacity: 0.3; }
+  }
+  
+  /* ===== CONTAINER ===== */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    background: var(--bg2);
+    color: var(--dim);
+    border: 2px solid var(--border);
+    border-bottom: none;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .tab:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  .tab.active {
+    background: var(--bg3);
+    color: var(--accent);
+    border-color: var(--accent);
+    border-bottom: 2px solid var(--bg3);
+    margin-bottom: -2px;
+  }
+  
+  .tab.danger { color: var(--red); }
+  .tab.danger.active { border-color: var(--red); }
+  
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  
+  /* ===== SECTIONS ===== */
+  .section {
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--accent);
+  }
+  
+  .section-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .section-title::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 18px;
+  }
+  
+  /* ===== FORMS ===== */
+  input, select, button, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    margin: 6px 0;
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(212,160,23,0.2);
+  }
+  
+  input::placeholder { color: var(--dim); }
+  
+  button {
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  
+  button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212,160,23,0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  button:hover::before { left: 100%; }
+  
+  button:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 25px rgba(212,160,23,0.4);
+  }
+  
+  button.danger {
+    color: var(--red);
+    border-color: var(--red);
+  }
+  
+  button.danger:hover {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(239,68,68,0.5);
+  }
+  
+  button.warn {
+    color: #fbbf24;
+    border-color: #fbbf24;
+  }
+  
+  button.warn:hover {
+    background: #fbbf24;
+    color: #000;
+  }
+  
+  button.success {
+    color: var(--green);
+    border-color: var(--green);
+  }
+  
+  button.success:hover {
+    background: var(--green);
+    color: #000;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .form-row > * { flex: 1; }
+  
+  /* ===== LISTS ===== */
+  .item {
+    background: var(--bg);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px;
+    margin: 8px 0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+  
+  .item:hover {
+    background: var(--bg2);
+    border-left-color: var(--accent2);
+  }
+  
   .item.red { border-left-color: var(--red); }
   .item.blue { border-left-color: var(--blue); }
-  .item .meta { color: var(--dim); font-size: 10px; }
-  .item .actions { display: flex; gap: 4px; }
-  .item .actions button {
-    width: auto; padding: 4px 10px; margin: 0; font-size: 10px;
+  
+  .item .meta {
+    color: var(--dim);
+    font-size: 10px;
+    font-family: var(--mono);
+    margin-top: 4px;
+    letter-spacing: 1px;
   }
-  .empty { color: var(--dim); font-size: 11px; padding: 12px; text-align: center; font-style: italic; }
-
+  
+  .item .actions {
+    display: flex;
+    gap: 6px;
+  }
+  
+  .item .actions button {
+    width: auto;
+    padding: 6px 12px;
+    margin: 0;
+    font-size: 11px;
+  }
+  
+  .empty {
+    color: var(--dim);
+    font-size: 12px;
+    padding: 16px;
+    text-align: center;
+    font-style: italic;
+    font-family: var(--mono);
+  }
+  
   /* ===== QR ===== */
   .qr-box {
-    background: #fff; padding: 10px; margin-top: 10px;
+    background: #fff;
+    padding: 12px;
+    margin-top: 12px;
     display: inline-block;
+    border: 2px solid var(--accent);
   }
-  .qr-box img { display: block; max-width: 200px; }
+  
+  .qr-box img {
+    display: block;
+    max-width: 220px;
+  }
+  
   .qr-link {
-    font-size: 10px; color: var(--dim);
-    word-break: break-all; margin-top: 6px;
-    padding: 6px; background: var(--bg); border: 1px solid var(--border);
-  }
-
-  /* ===== ТАЙМЕР ===== */
-  .timer-display {
-    font-size: 48px; color: var(--accent);
-    text-align: center; padding: 20px;
-    background: var(--bg); border: 1px solid var(--accent);
-    letter-spacing: 4px; margin: 10px 0;
-    text-shadow: 0 0 20px rgba(212,160,23,0.4);
-  }
-
-  /* ===== СЧЁТ ===== */
-  .score-board {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    margin: 10px 0;
-  }
-  .score-card {
-    padding: 20px; text-align: center;
-    border: 1px solid var(--border); background: var(--bg);
-  }
-  .score-card.red { border-color: var(--red); }
-  .score-card.blue { border-color: var(--blue); }
-  .score-card .value {
-    font-size: 42px; font-weight: bold;
-    letter-spacing: 2px;
-  }
-  .score-card.red .value { color: var(--red); }
-  .score-card.blue .value { color: var(--blue); }
-  .score-card .label { font-size: 11px; color: var(--dim); margin-top: 4px; }
-
-  /* ===== ЖУРНАЛ ===== */
-  #log {
-    max-height: 400px; overflow-y: auto;
-    background: var(--bg); padding: 10px;
-    border: 1px solid var(--border); font-size: 11px;
-  }
-  #log .log-item {
-    padding: 4px 0; border-bottom: 1px dashed var(--border);
-    display: flex; gap: 10px;
-  }
-  #log .log-time { color: var(--dim); min-width: 80px; }
-  #log .log-type { color: var(--accent); min-width: 120px; }
-  #log .log-msg { color: var(--text); }
-
-  /* ===== МОДАЛКА ===== */
-  #modal {
-    position: fixed; inset: 0; z-index: 1000;
-    background: rgba(0,0,0,0.9);
-    display: none; align-items: center; justify-content: center;
-    backdrop-filter: blur(6px);
-  }
-  #modal.show { display: flex; }
-  #modal .box {
-    background: var(--bg2); border: 1px solid var(--accent);
-    padding: 24px; max-width: 400px; width: 90%;
-  }
-  #modal h3 {
-    color: var(--accent); margin: 0 0 12px;
-    font-size: 14px; letter-spacing: 2px;
-  }
-  #modal p { color: var(--text); font-size: 12px; line-height: 1.6; }
-  #modal .actions { display: flex; gap: 8px; margin-top: 16px; }
-
-  /* ===== АВТОРИЗАЦИЯ ===== */
-  #authOverlay {
-    position: fixed; inset: 0; z-index: 2000;
+    font-size: 11px;
+    color: var(--dim);
+    word-break: break-all;
+    margin-top: 8px;
+    padding: 8px;
     background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
   }
+  
+  /* ===== TIMER ===== */
+  .timer-display {
+    font-size: 56px;
+    color: var(--accent);
+    text-align: center;
+    padding: 30px;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    letter-spacing: 6px;
+    margin: 14px 0;
+    text-shadow: 0 0 30px rgba(212,160,23,0.4);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+  
+  /* ===== SCORE ===== */
+  .score-board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 14px 0;
+  }
+  
+  .score-card {
+    padding: 30px;
+    text-align: center;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .score-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent);
+  }
+  
+  .score-card.red { border-color: var(--red); }
+  .score-card.red::before { background: var(--red); }
+  .score-card.blue { border-color: var(--blue); }
+  .score-card.blue::before { background: var(--blue); }
+  
+  .score-card .value {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: var(--mono);
+  }
+  
+  .score-card.red .value { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.4); }
+  .score-card.blue .value { color: var(--blue); text-shadow: 0 0 20px rgba(96,165,250,0.4); }
+  
+  .score-card .label {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  
+  /* ===== LOG ===== */
+  #log {
+    max-height: 500px;
+    overflow-y: auto;
+    background: var(--bg);
+    padding: 14px;
+    border: 2px solid var(--border);
+    font-size: 11px;
+  }
+  
+  #log .log-item {
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    display: flex;
+    gap: 12px;
+    font-family: var(--mono);
+  }
+  
+  #log .log-time {
+    color: var(--dim);
+    min-width: 90px;
+  }
+  
+  #log .log-type {
+    color: var(--accent);
+    min-width: 140px;
+    font-weight: 600;
+  }
+  
+  #log .log-msg { color: var(--text); }
+  
+  /* ===== MODAL ===== */
+  #modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  #modal.show { display: flex; }
+  
+  #modal .box {
+    background: var(--bg2);
+    border: 3px solid var(--accent);
+    padding: 30px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(212,160,23,0.3);
+  }
+  
+  #modal h3 {
+    color: var(--accent);
+    margin: 0 0 16px;
+    font-family: var(--sans);
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  
+  #modal p {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  
+  #modal .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  /* ===== AUTH ===== */
+  #authOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
   #authOverlay .box {
-    background: var(--bg2); border: 1px solid var(--accent);
-    padding: 30px; max-width: 380px; width: 90%; text-align: center;
+    background: var(--bg2);
+    border: 3px solid var(--accent);
+    padding: 40px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 80px rgba(212,160,23,0.2);
   }
+  
   #authOverlay .logo {
-    font-size: 32px; margin-bottom: 10px;
+    font-size: 36px;
+    margin-bottom: 12px;
   }
+  
   #authOverlay h2 {
-    color: var(--accent); margin: 0 0 4px;
-    letter-spacing: 3px; font-size: 16px;
+    color: var(--accent);
+    margin: 0 0 6px;
+    letter-spacing: 4px;
+    font-size: 20px;
+    font-family: var(--sans);
   }
+  
   #authOverlay .sub {
-    color: var(--dim); font-size: 11px;
-    letter-spacing: 2px; margin-bottom: 20px;
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+    font-family: var(--mono);
   }
+  
   #authOverlay .error {
-    color: var(--red); font-size: 11px;
-    margin-top: 8px; min-height: 14px;
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 10px;
+    min-height: 16px;
+    font-family: var(--mono);
   }
-
+  
   /* ===== TOAST ===== */
   #toasts {
-    position: fixed; bottom: 20px; right: 20px; z-index: 3000;
-    display: flex; flex-direction: column; gap: 8px;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
+  
   .toast {
-    background: var(--bg2); border-left: 4px solid var(--accent);
-    padding: 10px 16px; font-size: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
-    max-width: 320px;
+    background: var(--bg2);
+    border-left: 4px solid var(--accent);
+    padding: 12px 18px;
+    font-size: 13px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.8);
+    animation: slideIn 0.4s, fadeOut 0.6s 2.4s forwards;
+    max-width: 340px;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
   }
-  .toast.success { border-left-color: var(--green); }
-  .toast.error { border-left-color: var(--red); }
-  @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
-  @keyframes fadeOut { to { opacity: 0; transform: translateX(400px); } }
-
+  
+  .toast.success { border-left-color: var(--green); border-color: var(--green); }
+  .toast.error { border-left-color: var(--red); border-color: var(--red); }
+  
+  @keyframes slideIn {
+    from { transform: translateX(400px); }
+    to { transform: translateX(0); }
+  }
+  
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateX(400px); }
+  }
+  
   .hint {
-    color: var(--dim); font-size: 10px;
-    margin: 6px 0; font-style: italic;
+    color: var(--dim);
+    font-size: 11px;
+    margin: 8px 0;
+    font-style: italic;
+    font-family: var(--mono);
+    line-height: 1.5;
   }
-
-  ::-webkit-scrollbar { width: 6px; }
+  
+  ::-webkit-scrollbar { width: 10px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+  
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    #topBar { padding: 10px 14px; }
+    .stats { gap: 10px; font-size: 10px; }
+    .logo { font-size: 16px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ===== АВТОРИЗАЦИЯ ===== -->
+<!-- ===== AUTH ===== -->
 <div id="authOverlay">
   <div class="box">
     <div class="logo">🛡️</div>
-    <h2>POLYGON</h2>
-    <div class="sub">TACTICAL OPERATIONS CENTER</div>
-    <input type="password" id="adminPass" placeholder="Пароль организатора" autofocus>
-    <button onclick="adminLogin()">▸ Войти в систему</button>
+    <h2>TARKOV OPS</h2>
+    <div class="sub">COMMAND CENTER</div>
+    <input type="password" id="adminPass" placeholder="ПАРОЛЬ ОРГАНИЗАТОРА" autofocus>
+    <button onclick="adminLogin()">▸ ВОЙТИ В СИСТЕМУ</button>
     <div class="error" id="authError"></div>
   </div>
 </div>
 
 <!-- ===== TOP BAR ===== -->
 <div id="topBar" style="display:none">
-  <div class="logo">POLYGON // ADMIN</div>
+  <div class="logo">COMMAND CENTER</div>
   <div class="stats">
     <span class="live">FIREBASE LIVE</span>
-    <span class="stat">👥 <b id="stPlayers">0</b></span>
-    <span class="stat">⚔ <b id="stSquads">0</b></span>
-    <span class="stat">📍 <b id="stPois">0</b></span>
-    <span class="stat">📜 <b id="stEvents">0</b></span>
-    <span class="stat">ИГРА: <b id="stGame">ОЖИДАНИЕ</b></span>
-    <span class="stat red">🔴 <b id="stRed">0</b></span>
-    <span class="stat blue">🔵 <b id="stBlue">0</b></span>
-    <span id="stClock" style="color:var(--accent)">--:--:--</span>
+    <div class="stat">
+      <span class="label">ИГРОКИ</span>
+      <span class="value" id="stPlayers">0</span>
+    </div>
+    <div class="stat">
+      <span class="label">ВЗВОДЫ</span>
+      <span class="value" id="stSquads">0</span>
+    </div>
+    <div class="stat">
+      <span class="label">ТОЧКИ</span>
+      <span class="value" id="stPois">0</span>
+    </div>
+    <div class="stat">
+      <span class="label">СОБЫТИЯ</span>
+      <span class="value" id="stEvents">0</span>
+    </div>
+    <div class="stat green">
+      <span class="label">СТАТУС</span>
+      <span class="value" id="stGame">ОЖИДАНИЕ</span>
+    </div>
+    <div class="stat red">
+      <span class="label">КРАСНЫЕ</span>
+      <span class="value" id="stRed">0</span>
+    </div>
+    <div class="stat blue">
+      <span class="label">СИНИЕ</span>
+      <span class="value" id="stBlue">0</span>
+    </div>
+    <div class="stat">
+      <span class="label">ВРЕМЯ</span>
+      <span class="value" id="stClock">--:--:--</span>
+    </div>
   </div>
 </div>
 
-<!-- ===== КОНТЕНТ ===== -->
+<!-- ===== CONTENT ===== -->
 <div class="container" id="mainContent" style="display:none">
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('squads')">⚔ Взводы</div>
-    <div class="tab" onclick="switchTab('pois')">📍 Точки</div>
-    <div class="tab" onclick="switchTab('players')">👥 Игроки</div>
-    <div class="tab" onclick="switchTab('game')">⏱ Игра</div>
-    <div class="tab" onclick="switchTab('log')">📜 Журнал</div>
-    <div class="tab danger" onclick="switchTab('danger')">⚠ Управление</div>
+    <div class="tab active" onclick="switchTab('squads')">⚔ ВЗВОДЫ</div>
+    <div class="tab" onclick="switchTab('pois')">📍 ТОЧКИ</div>
+    <div class="tab" onclick="switchTab('players')">👥 ИГРОКИ</div>
+    <div class="tab" onclick="switchTab('game')">⏱ ИГРА</div>
+    <div class="tab" onclick="switchTab('log')">📜 ЖУРНАЛ</div>
+    <div class="tab danger" onclick="switchTab('danger')">⚠ УПРАВЛЕНИЕ</div>
   </div>
 
-  <!-- ===== ВЗВОДЫ ===== -->
+  <!-- ===== SQUADS ===== -->
   <div class="tab-content active" id="tab-squads">
     <div class="section">
-      <h3 class="section-title">Создать взвод</h3>
+      <h3 class="section-title">СОЗДАТЬ ВЗВОД</h3>
       <div class="form-row">
-        <input type="text" id="squadName" placeholder="Название (напр. Альфа)">
+        <input type="text" id="squadName" placeholder="НАЗВАНИЕ (НАПР. АЛЬФА)">
         <select id="squadTeam">
-          <option value="red">🔴 Красные</option>
-          <option value="blue">🔵 Синие</option>
+          <option value="red">🔴 КРАСНЫЕ</option>
+          <option value="blue">🔵 СИНИЕ</option>
         </select>
       </div>
-      <button onclick="createSquad()">▸ Создать</button>
+      <button onclick="createSquad()">▸ СОЗДАТЬ</button>
       <div id="squadQR"></div>
     </div>
     <div class="section">
-      <h3 class="section-title">Взводы (<span id="squadCount">0</span>)</h3>
+      <h3 class="section-title">ВЗВОДЫ (<span id="squadCount">0</span>)</h3>
       <div id="squadList"><div class="empty">// Взводов пока нет</div></div>
     </div>
   </div>
 
-  <!-- ===== ТОЧКИ ===== -->
+  <!-- ===== POIS ===== -->
   <div class="tab-content" id="tab-pois">
     <div class="section">
-      <h3 class="section-title">Создать точку интереса</h3>
-      <input type="text" id="poiName" placeholder="Название">
+      <h3 class="section-title">СОЗДАТЬ ТОЧКУ ИНТЕРЕСА</h3>
+      <input type="text" id="poiName" placeholder="НАЗВАНИЕ">
       <div class="form-row">
         <select id="poiType">
-          <option value="flag">🚩 Флаг (захватываемый)</option>
-          <option value="ammo">📦 Снабжение</option>
-          <option value="medic">🏥 Медпункт</option>
-          <option value="danger">⚠️ Опасная зона</option>
-          <option value="base">🏠 База</option>
+          <option value="flag">🚩 ФЛАГ (ЗАХВАТЫВАЕМЫЙ)</option>
+          <option value="ammo">📦 СНАБЖЕНИЕ</option>
+          <option value="medic">🏥 МЕДПУНКТ</option>
+          <option value="danger">⚠️ ОПАСНАЯ ЗОНА</option>
+          <option value="base">🏠 БАЗА</option>
         </select>
         <select id="poiTeam">
-          <option value="all">Все</option>
-          <option value="red">🔴 Красные</option>
-          <option value="blue">🔵 Синие</option>
+          <option value="all">ВСЕ</option>
+          <option value="red">🔴 КРАСНЫЕ</option>
+          <option value="blue">🔵 СИНИЕ</option>
         </select>
       </div>
       <div class="form-row">
-        <input type="number" step="any" id="poiLat" placeholder="Широта (55.7558)">
-        <input type="number" step="any" id="poiLng" placeholder="Долгота (37.6173)">
+        <input type="number" step="any" id="poiLat" placeholder="ШИРОТА (55.7558)">
+        <input type="number" step="any" id="poiLng" placeholder="ДОЛГОТА (37.6173)">
       </div>
-      <input type="number" id="poiRadius" placeholder="Радиус захвата (м) — только для флагов" value="50">
-      <button onclick="createPOI()">▸ Создать</button>
+      <input type="number" id="poiRadius" placeholder="РАДИУС ЗАХВАТА (М) — ТОЛЬКО ДЛЯ ФЛАГОВ" value="50">
+      <button onclick="createPOI()">▸ СОЗДАТЬ</button>
       <div class="hint">// Для флагов укажите радиус — игроки захватят их, зайдя внутрь</div>
     </div>
     <div class="section">
-      <h3 class="section-title">Точки (<span id="poiCount">0</span>)</h3>
+      <h3 class="section-title">ТОЧКИ (<span id="poiCount">0</span>)</h3>
       <div id="poiList"><div class="empty">// Точек пока нет</div></div>
     </div>
   </div>
 
-  <!-- ===== ИГРОКИ ===== -->
+  <!-- ===== PLAYERS ===== -->
   <div class="tab-content" id="tab-players">
     <div class="section">
-      <h3 class="section-title">Игроки онлайн</h3>
+      <h3 class="section-title">ИГРОКИ ОНЛАЙН</h3>
       <div id="playerList"><div class="empty">// Нет игроков онлайн</div></div>
     </div>
   </div>
 
-  <!-- ===== ИГРА ===== -->
+  <!-- ===== GAME ===== -->
   <div class="tab-content" id="tab-game">
     <div class="section">
-      <h3 class="section-title">Таймер игры</h3>
+      <h3 class="section-title">ТАЙМЕР ИГРЫ</h3>
       <div class="timer-display" id="timerDisplay">00:00</div>
       <div class="form-row">
-        <input type="number" id="timerMinutes" placeholder="Длительность (минуты)" value="30" min="1">
+        <input type="number" id="timerMinutes" placeholder="ДЛИТЕЛЬНОСТЬ (МИНУТЫ)" value="30" min="1">
       </div>
       <div class="form-row">
-        <button class="success" onclick="startGame()">▶ Начать игру</button>
-        <button class="danger" onclick="stopGame()">■ Остановить</button>
+        <button class="success" onclick="startGame()">▶ НАЧАТЬ ИГРУ</button>
+        <button class="danger" onclick="stopGame()">■ ОСТАНОВИТЬ</button>
       </div>
     </div>
 
     <div class="section">
-      <h3 class="section-title">Счёт команд</h3>
+      <h3 class="section-title">СЧЁТ КОМАНД</h3>
       <div class="score-board">
         <div class="score-card red">
           <div class="value" id="scoreRed">0</div>
@@ -392,66 +834,66 @@
         </div>
       </div>
       <div class="hint">// Очки начисляются автоматически при захвате флагов. Каждый захват = +1 очко команде.</div>
-      <button class="warn" onclick="resetScore()">↺ Сбросить счёт</button>
+      <button class="warn" onclick="resetScore()">↺ СБРОСИТЬ СЧЁТ</button>
     </div>
 
     <div class="section">
-      <h3 class="section-title">Вещание командиру / взводу</h3>
+      <h3 class="section-title">ВЕЩАНИЕ КОМАНДИРУ / ВЗВОДУ</h3>
       <select id="bcTarget">
-        <option value="all">📢 Всем</option>
-        <option value="red">🔴 Красным</option>
-        <option value="blue">🔵 Синим</option>
+        <option value="all">📢 ВСЕМ</option>
+        <option value="red">🔴 КРАСНЫМ</option>
+        <option value="blue">🔵 СИНИМ</option>
       </select>
-      <input type="text" id="bcSquad" placeholder="ID взвода (опц. — для точечного)">
-      <textarea id="bcMessage" rows="3" placeholder="Сообщение..."></textarea>
-      <button onclick="sendBroadcast()">📡 Отправить</button>
+      <input type="text" id="bcSquad" placeholder="ID ВЗВОДА (ОПЦ. — ДЛЯ ТОЧЕЧНОГО)">
+      <textarea id="bcMessage" rows="3" placeholder="СООБЩЕНИЕ..."></textarea>
+      <button onclick="sendBroadcast()">📡 ОТПРАВИТЬ</button>
     </div>
   </div>
 
-  <!-- ===== ЖУРНАЛ ===== -->
+  <!-- ===== LOG ===== -->
   <div class="tab-content" id="tab-log">
     <div class="section">
-      <h3 class="section-title">Журнал событий</h3>
-      <button onclick="exportCSV()">↓ Экспорт CSV</button>
-      <div id="log" style="margin-top:10px"><div class="empty">// Нет событий</div></div>
+      <h3 class="section-title">ЖУРНАЛ СОБЫТИЙ</h3>
+      <button onclick="exportCSV()">↓ ЭКСПОРТ CSV</button>
+      <div id="log" style="margin-top:12px"><div class="empty">// Нет событий</div></div>
     </div>
   </div>
 
-  <!-- ===== ОПАСНАЯ ЗОНА ===== -->
+  <!-- ===== DANGER ===== -->
   <div class="tab-content" id="tab-danger">
     <div class="section" style="border-color:var(--red)">
-      <h3 class="section-title" style="color:var(--red)">⚠ Опасная зона</h3>
+      <h3 class="section-title" style="color:var(--red)">⚠ ОПАСНАЯ ЗОНА</h3>
       <div class="hint">// Действия ниже необратимы. Подтверждение обязательно.</div>
       <div class="form-row">
-        <button class="danger" onclick="confirmAction('Удалить всех игроков?', () => db.ref('players').remove())">🗑 Сбросить игроков</button>
-        <button class="danger" onclick="confirmAction('Удалить все взводы?', () => db.ref('squads').remove())">🗑 Удалить взводы</button>
+        <button class="danger" onclick="confirmAction('Удалить всех игроков?', () => db.ref('players').remove())">🗑 СБРОСИТЬ ИГРОКОВ</button>
+        <button class="danger" onclick="confirmAction('Удалить все взводы?', () => db.ref('squads').remove())">🗑 УДАЛИТЬ ВЗВОДЫ</button>
       </div>
       <div class="form-row">
-        <button class="danger" onclick="confirmAction('Удалить все точки?', () => db.ref('pois').remove())">🗑 Удалить точки</button>
-        <button class="danger" onclick="confirmAction('Очистить журнал?', () => db.ref('events').remove())">🗑 Очистить журнал</button>
+        <button class="danger" onclick="confirmAction('Удалить все точки?', () => db.ref('pois').remove())">🗑 УДАЛИТЬ ТОЧКИ</button>
+        <button class="danger" onclick="confirmAction('Очистить журнал?', () => db.ref('events').remove())">🗑 ОЧИСТИТЬ ЖУРНАЛ</button>
       </div>
       <button class="danger" onclick="confirmAction('💥 ПОЛНЫЙ СБРОС: игроки, взводы, точки, игра, журнал?', () => db.ref().set({}))">💥 СБРОСИТЬ ВСЁ</button>
     </div>
 
     <div class="section">
-      <h3 class="section-title">🔐 Смена пароля (сессия)</h3>
-      <input type="password" id="newPass" placeholder="Новый пароль">
-      <button onclick="changePass()">Сохранить</button>
+      <h3 class="section-title">🔐 СМЕНА ПАРОЛЯ (СЕССИЯ)</h3>
+      <input type="password" id="newPass" placeholder="НОВЫЙ ПАРОЛЬ">
+      <button onclick="changePass()">СОХРАНИТЬ</button>
       <div class="hint">// Сохраняется только в рамках текущей сессии. Для постоянного пароля используйте config.js (поле ADMIN_PASS).</div>
     </div>
   </div>
 
 </div>
 
-<!-- ===== МОДАЛКА ===== -->
+<!-- ===== MODAL ===== -->
 <div id="modal">
   <div class="box">
-    <h3 id="modalTitle">Подтвердите действие</h3>
+    <h3 id="modalTitle">ПОДТВЕРДИТЕ ДЕЙСТВИЕ</h3>
     <p id="modalText"></p>
-    <input type="text" id="modalConfirm" placeholder="Введите ДА для подтверждения">
+    <input type="text" id="modalConfirm" placeholder="ВВЕДИТЕ ДА ДЛЯ ПОДТВЕРЖДЕНИЯ">
     <div class="actions">
-      <button onclick="closeModal()">Отмена</button>
-      <button class="danger" onclick="executeModal()">Выполнить</button>
+      <button onclick="closeModal()">ОТМЕНА</button>
+      <button class="danger" onclick="executeModal()">ВЫПОЛНИТЬ</button>
     </div>
   </div>
 </div>
@@ -467,13 +909,10 @@
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const DEFAULT_PASS = 'admin123';
-const ADMIN_PASS = (typeof window !== 'undefined' && window.ADMIN_PASS) || DEFAULT_PASS;
-
 let modalCallback = null;
 let timerInterval = null;
 
-// ===== ЧАСЫ =====
+// ===== CLOCK =====
 setInterval(() => {
   document.getElementById('stClock').textContent = new Date().toTimeString().slice(0,8);
 }, 1000);
@@ -488,16 +927,17 @@ function toast(msg, type = '') {
   setTimeout(() => t.remove(), 3000);
 }
 
-// ===== АВТОРИЗАЦИЯ =====
+// ===== AUTH =====
 function adminLogin() {
   const pass = document.getElementById('adminPass').value;
   if (pass === ADMIN_PASS) {
     sessionStorage.setItem('adminAuth', '1');
     showMain();
   } else {
-    document.getElementById('authError').textContent = '⚠ Неверный пароль';
+    document.getElementById('authError').textContent = '⚠ НЕВЕРНЫЙ ПАРОЛЬ';
   }
 }
+
 document.getElementById('adminPass').addEventListener('keypress', e => {
   if (e.key === 'Enter') adminLogin();
 });
@@ -511,7 +951,7 @@ function showMain() {
 
 if (sessionStorage.getItem('adminAuth') === '1') showMain();
 
-// ===== ТАБЫ =====
+// ===== TABS =====
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -519,12 +959,12 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
 }
 
-// ===== ГЕНЕРАЦИЯ ID =====
+// ===== GEN ID =====
 function genId() {
   return Math.random().toString(36).slice(2, 7).toUpperCase();
 }
 
-// ===== ВЗВОДЫ =====
+// ===== SQUADS =====
 async function createSquad() {
   const name = document.getElementById('squadName').value.trim();
   const team = document.getElementById('squadTeam').value;
@@ -535,15 +975,15 @@ async function createSquad() {
 
   const url = location.origin + location.pathname.replace('admin.html','index.html') + '?squad=' + id;
   const box = document.getElementById('squadQR');
-  box.innerHTML = `<div class="section-title" style="margin-top:12px">QR для взвода "${name}" [${id}]</div><div class="qr-box" id="qrImg"></div><div class="qr-link">${url}</div>`;
-  QRCode.toDataURL(url, { width: 220, margin: 1 }, (e, dataUrl) => {
+  box.innerHTML = `<div class="section-title" style="margin-top:14px">QR ДЛЯ ВЗВОДА "${name}" [${id}]</div><div class="qr-box" id="qrImg"></div><div class="qr-link">${url}</div>`;
+  QRCode.toDataURL(url, { width: 240, margin: 1 }, (e, dataUrl) => {
     document.getElementById('qrImg').innerHTML = `<img src="${dataUrl}">`;
   });
   db.ref('events').push({ type: 'SQUAD_CREATED', squad: id, name, team, time: Date.now() });
   toast('Взвод создан: ' + id, 'success');
 }
 
-// ===== ТОЧКИ =====
+// ===== POIS =====
 async function createPOI() {
   const name = document.getElementById('poiName').value.trim();
   const lat = parseFloat(document.getElementById('poiLat').value);
@@ -562,7 +1002,7 @@ async function createPOI() {
   toast('Точка создана: ' + name, 'success');
 }
 
-// ===== ИГРА =====
+// ===== GAME =====
 function startGame() {
   const mins = parseInt(document.getElementById('timerMinutes').value) || 30;
   const endTime = Date.now() + mins * 60 * 1000;
@@ -586,7 +1026,7 @@ function resetScore() {
   });
 }
 
-// ===== ВЕЩАНИЯ =====
+// ===== BROADCAST =====
 function sendBroadcast() {
   const target = document.getElementById('bcTarget').value;
   const squad = document.getElementById('bcSquad').value.trim();
@@ -601,17 +1041,19 @@ function sendBroadcast() {
   toast('Вещание отправлено', 'success');
 }
 
-// ===== МОДАЛКА =====
+// ===== MODAL =====
 function confirmAction(text, callback) {
   document.getElementById('modalText').textContent = text;
   document.getElementById('modalConfirm').value = '';
   modalCallback = callback;
   document.getElementById('modal').classList.add('show');
 }
+
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
   modalCallback = null;
 }
+
 function executeModal() {
   if (document.getElementById('modalConfirm').value.trim().toUpperCase() === 'ДА') {
     if (modalCallback) modalCallback();
@@ -622,7 +1064,7 @@ function executeModal() {
   closeModal();
 }
 
-// ===== СМЕНА ПАРОЛЯ =====
+// ===== CHANGE PASS =====
 function changePass() {
   const np = document.getElementById('newPass').value.trim();
   if (!np) return toast('Введите пароль', 'error');
@@ -631,11 +1073,12 @@ function changePass() {
   document.getElementById('newPass').value = '';
   toast('Пароль изменён (до перезагрузки)', 'success');
 }
+
 if (sessionStorage.getItem('adminPassOverride')) {
   window.ADMIN_PASS = sessionStorage.getItem('adminPassOverride');
 }
 
-// ===== ЭКСПОРТ CSV =====
+// ===== EXPORT CSV =====
 function exportCSV() {
   db.ref('events').once('value', snap => {
     const rows = [['Время','Тип','Данные']];
@@ -655,9 +1098,8 @@ function exportCSV() {
   });
 }
 
-// ===== СЛУШАТЕЛИ =====
+// ===== LISTENERS =====
 function initListeners() {
-  // Статистика в topbar
   db.ref('players').on('value', s => {
     let c = 0; s.forEach(() => c++);
     document.getElementById('stPlayers').textContent = c;
@@ -675,7 +1117,6 @@ function initListeners() {
     document.getElementById('stEvents').textContent = c;
   });
 
-  // Список взводов
   db.ref('squads').on('value', snap => {
     const el = document.getElementById('squadList');
     el.innerHTML = '';
@@ -700,7 +1141,6 @@ function initListeners() {
     if (!count) el.innerHTML = '<div class="empty">// Взводов пока нет</div>';
   });
 
-  // Список точек
   db.ref('pois').on('value', snap => {
     const el = document.getElementById('poiList');
     el.innerHTML = '';
@@ -726,7 +1166,6 @@ function initListeners() {
     if (!count) el.innerHTML = '<div class="empty">// Точек пока нет</div>';
   });
 
-  // Игроки
   db.ref('players').on('value', snap => {
     const el = document.getElementById('playerList');
     el.innerHTML = '';
@@ -749,7 +1188,6 @@ function initListeners() {
     if (!count) el.innerHTML = '<div class="empty">// Нет игроков онлайн</div>';
   });
 
-  // Статус игры
   db.ref('game/status').on('value', s => {
     const v = s.val() || 'waiting';
     const el = document.getElementById('stGame');
@@ -758,7 +1196,6 @@ function initListeners() {
     el.style.color = v === 'running' ? 'var(--green)' : (v === 'ended' ? 'var(--red)' : 'var(--accent)');
   });
 
-  // Таймер
   db.ref('game/timer').on('value', s => {
     const t = s.val();
     if (timerInterval) clearInterval(timerInterval);
@@ -784,7 +1221,6 @@ function initListeners() {
     timerInterval = setInterval(update, 1000);
   });
 
-  // Счёт
   db.ref('game/scores').on('value', s => {
     const v = s.val() || {};
     document.getElementById('scoreRed').textContent = v.red || 0;
@@ -793,7 +1229,6 @@ function initListeners() {
     document.getElementById('stBlue').textContent = v.blue || 0;
   });
 
-  // Журнал
   db.ref('events').limitToLast(100).on('value', snap => {
     const el = document.getElementById('log');
     el.innerHTML = '';
@@ -816,7 +1251,7 @@ function initListeners() {
   });
 }
 
-// ===== УТИЛИТЫ =====
+// ===== UTILS =====
 function copySquadLink(id) {
   const url = location.origin + location.pathname.replace('admin.html','index.html') + '?squad=' + id;
   navigator.clipboard.writeText(url).then(() => toast('Ссылка скопирована', 'success'));
