@@ -8,174 +8,128 @@
 <style>
   * { box-sizing: border-box; }
   :root {
-    --bg: #0a0e0a;
-    --bg2: #111614;
-    --bg3: #1a2018;
-    --border: #2a3a2a;
-    --accent: #d4a017;
-    --green: #4ade80;
-    --red: #ef4444;
-    --blue: #60a5fa;
-    --text: #c8d4c8;
-    --dim: #6a7a6a;
+    --bg: #0a0e0a; --bg2: #111614; --bg3: #1a2018;
+    --border: #2a3a2a; --accent: #d4a017;
+    --green: #4ade80; --red: #ef4444; --blue: #60a5fa;
+    --text: #c8d4c8; --dim: #6a7a6a;
     --mono: 'JetBrains Mono', 'Courier New', monospace;
   }
-  body {
-    margin: 0; font-family: var(--mono);
-    background: var(--bg); color: var(--text);
-    overflow: hidden;
-  }
-  #map {
-    position: absolute; inset: 0; z-index: 1;
-    background: #000;
-    filter: saturate(0.3) brightness(0.7) contrast(1.1);
-  }
+  body { margin: 0; font-family: var(--mono); background: var(--bg); color: var(--text); overflow: hidden; }
+  #map { position: absolute; inset: 0; z-index: 1; background: #000; filter: saturate(0.3) brightness(0.7) contrast(1.1); }
   .leaflet-container { background: #000 !important; font-family: var(--mono); }
-  .leaflet-popup-content-wrapper {
-    background: var(--bg2); color: var(--text);
-    border: 1px solid var(--accent); border-radius: 0;
-    font-family: var(--mono); font-size: 12px;
-  }
+  .leaflet-popup-content-wrapper { background: var(--bg2); color: var(--text); border: 1px solid var(--accent); border-radius: 0; font-size: 12px; }
   .leaflet-popup-tip { background: var(--bg2); }
-  .leaflet-control-zoom a {
-    background: var(--bg2) !important; color: var(--accent) !important;
-    border: 1px solid var(--border) !important;
-  }
+  .leaflet-control-zoom a { background: var(--bg2) !important; color: var(--accent) !important; border: 1px solid var(--border) !important; }
 
-  /* ===== СТАТУС-БАР ===== */
   #topBar {
     position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
-    background: rgba(10,14,10,0.92);
-    border-bottom: 1px solid var(--accent);
+    background: rgba(10,14,10,0.92); border-bottom: 1px solid var(--accent);
     padding: 6px 12px; font-size: 11px;
     display: flex; justify-content: space-between; align-items: center;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px); flex-wrap: wrap; gap: 6px;
   }
   #topBar .logo { color: var(--accent); font-weight: bold; letter-spacing: 2px; }
-  #topBar .stats { display: flex; gap: 16px; }
+  #topBar .stats { display: flex; gap: 12px; flex-wrap: wrap; }
   #topBar .stat { color: var(--dim); }
   #topBar .stat b { color: var(--green); }
   #topBar .stat.red b { color: var(--red); }
   #topBar .stat.blue b { color: var(--blue); }
   #clock { color: var(--accent); }
 
-  /* ===== ПАНЕЛЬ ===== */
   .panel {
-    position: absolute; top: 36px; left: 10px; z-index: 1000;
-    background: rgba(10,14,10,0.95);
-    border: 1px solid var(--accent);
-    width: 340px; max-height: calc(100vh - 50px);
+    position: absolute; top: 44px; left: 10px; z-index: 1000;
+    background: rgba(10,14,10,0.95); border: 1px solid var(--accent);
+    width: 340px; max-height: calc(100vh - 55px);
     overflow-y: auto; backdrop-filter: blur(6px);
     box-shadow: 0 0 30px rgba(212,160,23,0.15);
   }
   .panel-header {
-    background: var(--bg3);
-    padding: 10px 14px;
+    background: var(--bg3); padding: 10px 14px;
     border-bottom: 1px solid var(--accent);
     display: flex; justify-content: space-between; align-items: center;
   }
-  .panel-header h2 {
-    margin: 0; font-size: 13px; color: var(--accent);
-    letter-spacing: 2px; font-weight: bold;
-  }
+  .panel-header h2 { margin: 0; font-size: 13px; color: var(--accent); letter-spacing: 2px; }
   .panel-header .close {
-    background: none; border: 1px solid var(--border);
-    color: var(--dim); width: 24px; height: 24px;
-    cursor: pointer; font-family: var(--mono);
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    width: 24px; height: 24px; cursor: pointer; font-family: var(--mono);
   }
   .panel-header .close:hover { color: var(--red); border-color: var(--red); }
   .panel-body { padding: 14px; }
 
-  .section {
-    border: 1px solid var(--border);
-    margin-bottom: 12px; padding: 10px;
-    background: var(--bg2);
-  }
+  .section { border: 1px solid var(--border); margin-bottom: 12px; padding: 10px; background: var(--bg2); }
   .section-title {
-    color: var(--accent); font-size: 11px;
-    letter-spacing: 1px; margin-bottom: 8px;
-    padding-bottom: 4px; border-bottom: 1px dashed var(--border);
+    color: var(--accent); font-size: 11px; letter-spacing: 1px;
+    margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--border);
   }
   .section-title::before { content: "// "; color: var(--dim); }
 
-  input, select, button, textarea {
+  input, select, button {
     width: 100%; padding: 8px 10px; margin: 4px 0;
-    background: var(--bg); color: var(--text);
-    border: 1px solid var(--border);
-    font-family: var(--mono); font-size: 12px;
-    outline: none;
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px; outline: none;
   }
   input:focus, select:focus { border-color: var(--accent); }
   button {
-    background: var(--bg3); color: var(--accent);
-    cursor: pointer; letter-spacing: 1px;
-    text-transform: uppercase; font-weight: bold;
-    transition: all 0.15s;
+    background: var(--bg3); color: var(--accent); cursor: pointer;
+    letter-spacing: 1px; text-transform: uppercase; font-weight: bold;
   }
-  button:hover {
-    background: var(--accent); color: var(--bg);
-    border-color: var(--accent);
-  }
+  button:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
   button.danger { color: var(--red); border-color: #5a2020; }
-  button.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+  button.danger:hover { background: var(--red); color: #fff; }
   button.warn { color: #fbbf24; border-color: #5a4020; }
-  button.warn:hover { background: #fbbf24; color: #000; border-color: #fbbf24; }
+  button.warn:hover { background: #fbbf24; color: #000; }
 
   .hidden { display: none !important; }
-  .team-red { color: var(--red); }
-  .team-blue { color: var(--blue); }
-
-  /* ===== МАРКЕРЫ ===== */
-  .poi-icon, .soldier-icon { background: none !important; border: none !important; }
+  .poi-icon, .soldier-icon, .flag-icon { background: none !important; border: none !important; }
   .poi-marker {
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    background: rgba(10,14,10,0.85);
-    border: 1px solid var(--accent);
-    border-radius: 50%;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; background: rgba(10,14,10,0.85);
+    border: 1px solid var(--accent); border-radius: 50%;
     box-shadow: 0 0 10px rgba(212,160,23,0.4);
   }
+  .flag-marker {
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; background: rgba(10,14,10,0.9);
+    border: 2px solid var(--accent); border-radius: 50%;
+    animation: flagPulse 2s infinite;
+  }
+  .flag-marker.red { border-color: var(--red); box-shadow: 0 0 15px var(--red); }
+  .flag-marker.blue { border-color: var(--blue); box-shadow: 0 0 15px var(--blue); }
+  @keyframes flagPulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
   .soldier-marker {
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    border-radius: 50%;
-    border: 2px solid #fff;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; border-radius: 50%; border: 2px solid #fff;
     box-shadow: 0 0 8px rgba(0,0,0,0.8);
   }
   .soldier-marker.red { background: var(--red); }
   .soldier-marker.blue { background: var(--blue); }
-  .soldier-marker.sos {
-    animation: pulse 0.8s infinite;
-    background: #fff !important; color: var(--red);
-  }
+  .soldier-marker.sos { animation: pulse 0.8s infinite; background: #fff !important; color: var(--red); }
   @keyframes pulse {
     0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.8); }
     50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
   }
+  .radius-circle { stroke: var(--accent); stroke-dasharray: 5,5; fill: rgba(212,160,23,0.05); }
 
-  /* ===== СПИСКИ ===== */
   .list-item {
-    padding: 6px 8px; margin: 3px 0;
-    background: var(--bg); border-left: 2px solid var(--border);
-    font-size: 11px; display: flex; justify-content: space-between;
+    padding: 6px 8px; margin: 3px 0; background: var(--bg);
+    border-left: 2px solid var(--border); font-size: 11px;
+    display: flex; justify-content: space-between;
   }
   .list-item.red { border-left-color: var(--red); }
   .list-item.blue { border-left-color: var(--blue); }
   .list-item .status { color: var(--dim); font-size: 10px; }
   .list-item .status.sos { color: var(--red); font-weight: bold; }
 
-  /* ===== КНОПКА ПАНЕЛИ ===== */
   #togglePanel {
     position: absolute; top: 44px; left: 10px; z-index: 999;
-    width: 36px; height: 36px;
-    background: var(--bg2); border: 1px solid var(--accent);
-    color: var(--accent); cursor: pointer;
-    font-family: var(--mono); font-size: 16px;
+    width: 36px; height: 36px; background: var(--bg2);
+    border: 1px solid var(--accent); color: var(--accent);
+    cursor: pointer; font-family: var(--mono); font-size: 16px;
   }
 
-  /* ===== QR МОДАЛКА ===== */
   #qrModal {
     position: fixed; inset: 0; z-index: 2000;
     background: rgba(0,0,0,0.92);
@@ -186,31 +140,45 @@
     background: var(--bg2); border: 1px solid var(--accent);
     padding: 20px; max-width: 340px; text-align: center;
   }
-  #qrModal h3 {
-    color: var(--accent); margin: 0 0 12px;
-    font-size: 13px; letter-spacing: 2px;
-  }
-  #qrModal img {
-    background: #fff; padding: 8px; max-width: 100%;
-  }
+  #qrModal h3 { color: var(--accent); margin: 0 0 12px; font-size: 13px; letter-spacing: 2px; }
+  #qrModal img { background: #fff; padding: 8px; max-width: 100%; }
   #qrModal .link {
-    font-size: 10px; color: var(--dim);
-    word-break: break-all; margin-top: 10px;
-    padding: 6px; background: var(--bg); border: 1px solid var(--border);
+    font-size: 10px; color: var(--dim); word-break: break-all;
+    margin-top: 10px; padding: 6px; background: var(--bg); border: 1px solid var(--border);
   }
-  #qrModal button { margin-top: 12px; }
 
-  /* ===== СКРОЛЛ ===== */
+  /* ===== УВЕДОМЛЕНИЯ ===== */
+  #notifications {
+    position: fixed; top: 50px; right: 10px; z-index: 3000;
+    display: flex; flex-direction: column; gap: 8px;
+    max-width: 340px; pointer-events: none;
+  }
+  .notif {
+    background: var(--bg2); border-left: 4px solid var(--accent);
+    padding: 12px 16px; font-size: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    animation: slideIn 0.3s, fadeOut 0.5s 4.5s forwards;
+    pointer-events: auto;
+  }
+  .notif.capture { border-left-color: var(--green); }
+  .notif.broadcast { border-left-color: var(--blue); }
+  .notif.sos { border-left-color: var(--red); }
+  .notif .title { color: var(--accent); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+  .notif.capture .title { color: var(--green); }
+  .notif.broadcast .title { color: var(--blue); }
+  .notif.sos .title { color: var(--red); }
+  @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; transform: translateX(400px); } }
+
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); }
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-  /* ===== АДАПТИВ ===== */
   @media (max-width: 600px) {
     .panel { width: calc(100% - 20px); }
     #topBar { font-size: 10px; padding: 4px 8px; }
-    #topBar .stats { gap: 8px; }
+    #topBar .stats { gap: 6px; }
   }
 </style>
 </head>
@@ -218,11 +186,13 @@
 
 <div id="map"></div>
 
-<!-- ===== СТАТУС-БАР ===== -->
 <div id="topBar">
-  <div class="logo">◢ POLYGON // TACTICAL MAP ◣</div>
+  <div class="logo">◢ POLYGON ◣</div>
   <div class="stats">
     <span class="stat">ИГРА: <b id="gameStatus">ОЖИДАНИЕ</b></span>
+    <span class="stat">⏱ <b id="gameTimer">00:00</b></span>
+    <span class="stat red">🔴 <b id="redScore">0</b></span>
+    <span class="stat blue">🔵 <b id="blueScore">0</b></span>
     <span class="stat red">КР: <b id="redCount">0</b></span>
     <span class="stat blue">СН: <b id="blueCount">0</b></span>
     <span class="stat" id="coordStat">GPS: <b>--</b></span>
@@ -230,10 +200,10 @@
   </div>
 </div>
 
-<!-- ===== КНОПКА ОТКРЫТИЯ ===== -->
 <button id="togglePanel" class="hidden" onclick="document.getElementById('sidePanel').classList.remove('hidden');this.classList.add('hidden')">◢</button>
 
-<!-- ===== БОКОВАЯ ПАНЕЛЬ ===== -->
+<div id="notifications"></div>
+
 <div class="panel" id="sidePanel">
   <div class="panel-header">
     <h2>◢ ОПЕРАТОР ◣</h2>
@@ -241,21 +211,16 @@
   </div>
   <div class="panel-body">
 
-    <!-- ВХОД -->
     <div id="loginPanel">
       <div class="section">
         <div class="section-title">ВХОД НА ПОЛИГОН</div>
-        <div style="color:var(--dim);font-size:10px;margin-bottom:8px;">
-          // Авторизуйтесь для подключения к тактической сети
-        </div>
+        <div style="color:var(--dim);font-size:10px;margin-bottom:8px;">// Авторизуйтесь для подключения</div>
       </div>
-
       <div class="section">
         <div class="section-title">ВСТУПЛЕНИЕ ПО QR</div>
         <input type="text" id="joinCode" placeholder="Код взвода">
         <button onclick="joinByCode()">▸ Вступить</button>
       </div>
-
       <div class="section">
         <div class="section-title">СОЛДАТ</div>
         <input type="text" id="soldierName" placeholder="Позывной">
@@ -265,7 +230,6 @@
         </select>
         <button onclick="loginSoldier()">▸ Войти как солдат</button>
       </div>
-
       <div class="section">
         <div class="section-title">КОМАНДИР ВЗВОДА</div>
         <input type="text" id="cmdSquad" placeholder="ID взвода">
@@ -277,7 +241,6 @@
       </div>
     </div>
 
-    <!-- СОЛДАТ -->
     <div id="soldierPanel" class="hidden">
       <div class="section">
         <div class="section-title">ОПЕРАТОР</div>
@@ -289,14 +252,12 @@
       </div>
       <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
       <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
-
       <div class="section">
-        <div class="section-title">ОБЪЕКТЫ В ЗОНЕ ВИДИМОСТИ</div>
+        <div class="section-title">ОБЪЕКТЫ В ЗОНЕ</div>
         <div id="visibleList"><div style="color:var(--dim);font-size:11px">// Нет данных</div></div>
       </div>
     </div>
 
-    <!-- КОМАНДИР -->
     <div id="commanderPanel" class="hidden">
       <div class="section">
         <div class="section-title">КОМАНДИР</div>
@@ -308,7 +269,6 @@
       <button onclick="showQR()">📱 QR ДЛЯ БОЙЦОВ</button>
       <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
       <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
-
       <div class="section">
         <div class="section-title">БОЙЦЫ ВЗВОДА</div>
         <div id="squadList"><div style="color:var(--dim);font-size:11px">// Нет бойцов</div></div>
@@ -318,7 +278,6 @@
   </div>
 </div>
 
-<!-- ===== QR МОДАЛКА ===== -->
 <div id="qrModal" class="hidden">
   <div class="box">
     <h3>◢ QR ДЛЯ ВСТУПЛЕНИЯ ◣</h3>
@@ -337,27 +296,38 @@
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const map = L.map('map', { zoomControl: true }).setView([55.7558, 37.6173], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OSM', maxZoom: 19
-}).addTo(map);
+const map = L.map('map').setView([55.7558, 37.6173], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM', maxZoom: 19 }).addTo(map);
 
 const soldiersLayer = L.layerGroup().addTo(map);
 const poisLayer = L.layerGroup().addTo(map);
+const flagsLayer = L.layerGroup().addTo(map);
+const radiusLayer = L.layerGroup().addTo(map);
 
 let me = null;
 let watchId = null;
+let myCoords = null;
 let listeners = [];
+let gameTimerInterval = null;
+let capturedFlags = new Set(); // уже захваченные мной
 
 const teamEmoji = { red: '🔴', blue: '🔵' };
 const poiIcons = { flag: '🚩', ammo: '📦', medic: '🏥', danger: '⚠️', base: '🏠' };
 
 // ===== ЧАСЫ =====
 setInterval(() => {
-  const d = new Date();
-  document.getElementById('clock').textContent =
-    d.toTimeString().slice(0,8);
+  document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
 }, 1000);
+
+// ===== УВЕДОМЛЕНИЯ =====
+function notify(title, text, type = '') {
+  const box = document.getElementById('notifications');
+  const n = document.createElement('div');
+  n.className = 'notif ' + type;
+  n.innerHTML = `<div class="title">${title}</div><div>${text}</div>`;
+  box.appendChild(n);
+  setTimeout(() => n.remove(), 5000);
+}
 
 // ===== ВХОД =====
 function loginSoldier() {
@@ -403,11 +373,13 @@ function startSession() {
     document.getElementById('sTeam').textContent = teamEmoji[me.team];
     document.getElementById('sSquad').textContent = me.squad;
   }
-  document.getElementById('gameStatus').textContent = me.team.toUpperCase();
   registerPlayer();
   startGeolocation();
   subscribeToPOIs();
   subscribeToSoldiers();
+  subscribeToGame();       // ← ТАЙМЕР + СЧЁТ
+  subscribeToBroadcasts(); // ← ВЕЩАНИЯ
+  subscribeToCaptures();   // ← ЗАХВАТЫ ФЛАГОВ
 }
 
 function logout() {
@@ -416,11 +388,11 @@ function logout() {
   listeners.forEach(l => l.ref.off());
   listeners = [];
   if (watchId) navigator.geolocation.clearWatch(watchId);
+  if (gameTimerInterval) clearInterval(gameTimerInterval);
   localStorage.removeItem('me');
   location.reload();
 }
 
-// ===== РЕГИСТРАЦИЯ =====
 function registerPlayer() {
   const ref = db.ref('players/' + me.id);
   ref.set({
@@ -434,26 +406,30 @@ function registerPlayer() {
 function startGeolocation() {
   if (!navigator.geolocation) return alert('// GPS НЕ ПОДДЕРЖИВАЕТСЯ');
   watchId = navigator.geolocation.watchPosition(pos => {
-    const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+    const { latitude: lat, longitude: lng } = pos.coords;
+    myCoords = { lat, lng };
     db.ref('players/' + me.id).update({ lat, lng, updatedAt: Date.now() });
-    document.getElementById('coordStat').innerHTML =
-      `GPS: <b>${lat.toFixed(4)}, ${lng.toFixed(4)}</b>`;
+    document.getElementById('coordStat').innerHTML = `GPS: <b>${lat.toFixed(4)}, ${lng.toFixed(4)}</b>`;
     if (map.getZoom() < 14) map.setView([lat, lng], 16);
+    checkFlagCapture(); // ← проверка захвата
   }, err => {
     console.warn('// GPS ERR:', err);
     document.getElementById('coordStat').innerHTML = `GPS: <b style="color:var(--red)">ОШИБКА</b>`;
-  }, { enableHighAccuracy: true, maximumAge: 5000 });
+  }, { enableHighAccuracy: true, maximumAge: 3000 });
 }
 
-// ===== POI =====
+// ===== POI (обычные точки) =====
 function subscribeToPOIs() {
   const ref = db.ref('pois');
   listeners.push({ ref });
   ref.on('value', snap => {
     poisLayer.clearLayers();
+    radiusLayer.clearLayers();
     snap.forEach(ch => {
       const p = ch.val();
       if (p.team !== 'all' && p.team !== me.team) return;
+      if (p.type === 'flag') return; // флаги — в отдельный слой
+
       const icon = L.divIcon({
         html: `<div class="poi-marker">${poiIcons[p.type] || '📍'}</div>`,
         className: 'poi-icon', iconSize: [32, 32], iconAnchor: [16, 16]
@@ -461,8 +437,79 @@ function subscribeToPOIs() {
       L.marker([p.lat, p.lng], { icon })
         .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br><span style="color:var(--dim)">${p.type.toUpperCase()} | ${p.team.toUpperCase()}</span><br>${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`)
         .addTo(poisLayer);
+
+      if (p.radius) {
+        L.circle([p.lat, p.lng], {
+          radius: p.radius, className: 'radius-circle',
+          color: '#d4a017', fillColor: '#d4a017', fillOpacity: 0.05, dashArray: '5,5'
+        }).addTo(radiusLayer);
+      }
     });
   });
+}
+
+// ===== ФЛАГИ (отдельный слой + захват) =====
+let flagsData = {};
+function subscribeFlags() {
+  const ref = db.ref('pois');
+  ref.on('value', snap => {
+    flagsLayer.clearLayers();
+    flagsData = {};
+    snap.forEach(ch => {
+      const p = ch.val();
+      if (p.type !== 'flag') return;
+      if (p.team !== 'all' && p.team !== me.team) return;
+      flagsData[ch.key] = p;
+
+      const owner = p.capturedBy || 'neutral';
+      const cls = owner === 'red' ? 'red' : (owner === 'blue' ? 'blue' : '');
+      const icon = L.divIcon({
+        html: `<div class="flag-marker ${cls}">🚩</div>`,
+        className: 'flag-icon', iconSize: [40, 40], iconAnchor: [20, 20]
+      });
+      const marker = L.marker([p.lat, p.lng], { icon })
+        .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>🚩 ФЛАГ<br>Владелец: <b>${owner === 'neutral' ? 'НЕЙТРАЛЬНЫЙ' : owner.toUpperCase()}</b><br>Радиус: ${p.radius || 50}м`)
+        .addTo(flagsLayer);
+
+      if (p.radius) {
+        const color = owner === 'red' ? '#ef4444' : (owner === 'blue' ? '#60a5fa' : '#d4a017');
+        L.circle([p.lat, p.lng], {
+          radius: p.radius, color, fillColor: color, fillOpacity: 0.08, dashArray: '5,5'
+        }).addTo(flagsLayer);
+      }
+    });
+  });
+}
+
+// ===== ЗАХВАТ ФЛАГОВ =====
+function checkFlagCapture() {
+  if (!myCoords) return;
+  Object.entries(flagsData).forEach(([key, f]) => {
+    if (!f.radius) return;
+    if (f.team !== 'all' && f.team !== me.team) return;
+    const dist = distance(myCoords.lat, myCoords.lng, f.lat, f.lng);
+    if (dist <= f.radius && f.capturedBy !== me.team) {
+      // Захватываем флаг
+      db.ref('pois/' + key + '/capturedBy').set(me.team);
+      db.ref('game/scores/' + me.team).transaction(v => (v || 0) + 1);
+      db.ref('game/captures').push({
+        flag: f.name, flagId: key, team: me.team, player: me.name,
+        lat: f.lat, lng: f.lng, time: Date.now()
+      });
+      db.ref('events').push({
+        type: 'FLAG_CAPTURED', flag: f.name, team: me.team, player: me.name, time: Date.now()
+      });
+      notify('🚩 ФЛАГ ЗАХВАЧЕН', `${f.name} → ${me.team.toUpperCase()} (${me.name})`, 'capture');
+    }
+  });
+}
+
+function distance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 // ===== СОЛДАТЫ =====
@@ -502,10 +549,78 @@ function subscribeToSoldiers() {
 
     document.getElementById('redCount').textContent = redC;
     document.getElementById('blueCount').textContent = blueC;
+    if (!listEl.children.length) listEl.innerHTML = '<div style="color:var(--dim);font-size:11px">// Нет данных</div>';
+  });
+}
 
-    if (!listEl.children.length) {
-      listEl.innerHTML = '<div style="color:var(--dim);font-size:11px">// Нет данных</div>';
+// ===== ИГРА (таймер + счёт + статус) =====
+function subscribeToGame() {
+  // Статус игры
+  db.ref('game/status').on('value', snap => {
+    const s = snap.val() || 'waiting';
+    const el = document.getElementById('gameStatus');
+    el.textContent = { waiting: 'ОЖИДАНИЕ', running: 'ИГРА', paused: 'ПАУЗА', ended: 'ФИНИШ' }[s] || s.toUpperCase();
+    el.style.color = s === 'running' ? 'var(--green)' : (s === 'ended' ? 'var(--red)' : 'var(--accent)');
+  });
+
+  // Таймер
+  db.ref('game/timer').on('value', snap => {
+    const t = snap.val();
+    if (!t) return;
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+
+    const updateTimer = () => {
+      let remaining;
+      if (t.mode === 'countdown') {
+        remaining = Math.max(0, t.endTime - Date.now());
+        if (remaining === 0) {
+          clearInterval(gameTimerInterval);
+          notify('⏱ ВРЕМЯ ВЫШЛО', 'Игра завершена', 'broadcast');
+        }
+      } else {
+        remaining = Date.now() - t.startTime;
+      }
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      document.getElementById('gameTimer').textContent =
+        String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    };
+    updateTimer();
+    if (t.mode === 'countdown' || t.mode === 'stopwatch') {
+      gameTimerInterval = setInterval(updateTimer, 1000);
     }
+  });
+
+  // Счёт
+  db.ref('game/scores').on('value', snap => {
+    const s = snap.val() || {};
+    document.getElementById('redScore').textContent = s.red || 0;
+    document.getElementById('blueScore').textContent = s.blue || 0;
+  });
+}
+
+// ===== ВЕЩАНИЯ =====
+let lastBroadcastId = null;
+function subscribeToBroadcasts() {
+  db.ref('game/broadcasts').limitToLast(1).on('child_added', snap => {
+    const b = snap.val();
+    if (!b) return;
+    // Фильтр по получателю
+    if (b.target !== 'all' && b.target !== me.team) return;
+    if (me.role === 'commander' && b.targetSquad && b.targetSquad !== me.squad) return;
+    // Не показываем свои же
+    if (b.from === me.id) return;
+
+    notify('📡 ВЕЩАНИЕ', b.message, 'broadcast');
+  });
+}
+
+// ===== ЗАХВАТЫ (уведомления о чужих захватах) =====
+function subscribeToCaptures() {
+  db.ref('game/captures').limitToLast(1).on('child_added', snap => {
+    const c = snap.val();
+    if (!c || c.player === me.name) return;
+    notify('🚩 ЗАХВАТ ФЛАГА', `${c.player} (${c.team.toUpperCase()}) захватил "${c.flag}"`, 'capture');
   });
 }
 
@@ -516,7 +631,7 @@ function sendSOS() {
   db.ref('events').push({ type: 'SOS', player: me.name, team: me.team, time: Date.now() });
   const s = document.getElementById('sStatus');
   if (s) { s.textContent = '🆘 ТРЕВОГА'; s.style.color = 'var(--red)'; }
-  alert('// SOS ОТПРАВЛЕН');
+  notify('🆘 SOS', 'Сигнал тревоги отправлен', 'sos');
 }
 
 // ===== QR =====
@@ -530,15 +645,45 @@ function showQR() {
   });
 }
 
-// ===== АВТОВХОД ПО URL =====
+// ===== АВТОВХОД =====
 const params = new URLSearchParams(location.search);
 if (params.get('squad')) document.getElementById('joinCode').value = params.get('squad');
 
-// ===== ВОССТАНОВЛЕНИЕ =====
 const saved = localStorage.getItem('me');
 if (saved) {
   try { me = JSON.parse(saved); startSession(); } catch(e) {}
 }
+
+// Запуск подписки на флаги (отдельно, т.к. нужна для захвата)
+const flagsRef = db.ref('pois');
+listeners.push({ ref: flagsRef });
+flagsRef.on('value', snap => {
+  flagsLayer.clearLayers();
+  flagsData = {};
+  snap.forEach(ch => {
+    const p = ch.val();
+    if (p.type !== 'flag') return;
+    if (p.team !== 'all' && p.team !== me?.team) return;
+    flagsData[ch.key] = { ...p, _key: ch.key };
+
+    const owner = p.capturedBy || 'neutral';
+    const cls = owner === 'red' ? 'red' : (owner === 'blue' ? 'blue' : '');
+    const icon = L.divIcon({
+      html: `<div class="flag-marker ${cls}">🚩</div>`,
+      className: 'flag-icon', iconSize: [40, 40], iconAnchor: [20, 20]
+    });
+    L.marker([p.lat, p.lng], { icon })
+      .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>🚩 ФЛАГ<br>Владелец: <b>${owner === 'neutral' ? 'НЕЙТРАЛЬНЫЙ' : owner.toUpperCase()}</b><br>Радиус: ${p.radius || 50}м`)
+      .addTo(flagsLayer);
+
+    if (p.radius) {
+      const color = owner === 'red' ? '#ef4444' : (owner === 'blue' ? '#60a5fa' : '#d4a017');
+      L.circle([p.lat, p.lng], {
+        radius: p.radius, color, fillColor: color, fillOpacity: 0.08, dashArray: '5,5'
+      }).addTo(flagsLayer);
+    }
+  });
+});
 </script>
 </body>
 </html>
