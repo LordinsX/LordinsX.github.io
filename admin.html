@@ -1,109 +1,1146 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Админ-панель</title>
-  <style>body { font-family: sans-serif; padding: 20px; }</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLYGON // ADMIN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0B0D0F;
+    --surface:  #131720;
+    --surface2: #1C2330;
+    --border:   #2A3444;
+    --accent:   #39D353;
+    --accent-dim: rgba(57,211,83,0.12);
+    --red:      #F85149;
+    --red-dim:  rgba(248,81,73,0.12);
+    --blue:     #58A6FF;
+    --blue-dim: rgba(88,166,255,0.12);
+    --amber:    #E3B341;
+    --amber-dim:rgba(227,179,65,0.12);
+    --text:     #F0F6FC;
+    --muted:    #8B949E;
+    --muted2:   #484F58;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+    --r: 8px;
+    --r-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    background-image:
+      linear-gradient(rgba(57,211,83,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57,211,83,0.02) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ─── LAYOUT ─────────────────────────────────────── */
+  .shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────── */
+  .hdr {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hdr-logo {
+    width: 44px; height: 44px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: var(--r);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .hdr-title {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .hdr-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+  .hdr-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted2);
+    animation: pulse 2s infinite;
+  }
+  .dot.live { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ─── AUTH ────────────────────────────────────────── */
+  .auth-wrap {
+    max-width: 380px;
+    margin: 80px auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 32px;
+  }
+  .auth-wrap h2 {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  /* ─── GRID ────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width:680px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+  /* ─── SECTION / CARD ──────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-head h2 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .card-icon {
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  /* ─── TABS ────────────────────────────────────────── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 4px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { background: var(--surface2); color: var(--accent); border: 1px solid var(--border); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── FORM ELEMENTS ───────────────────────────────── */
+  label {
+    display: block;
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  select option { background: var(--surface2); }
+  .field { margin-bottom: 14px; }
+
+  /* ─── BUTTONS ─────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-accent {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-accent:hover { background: rgba(57,211,83,0.2); }
+  .btn-danger {
+    background: var(--red-dim);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-danger:hover { background: rgba(248,81,73,0.2); }
+  .btn-blue {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+  /* ─── BADGES ──────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+  .badge-green { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(57,211,83,0.3); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(227,179,65,0.3); }
+  .badge-muted { background: rgba(139,148,158,0.1); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ─── LIST ITEMS ──────────────────────────────────── */
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .list-item:hover { border-color: var(--muted2); }
+  .list-item-name {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .list-item-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ─── STAT CARDS ──────────────────────────────────── */
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+  @media(max-width:680px) { .stats { grid-template-columns: repeat(2,1fr); } }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ─── QR BOX ──────────────────────────────────────── */
+  .qr-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+  }
+  .qr-wrap.show { display: flex; gap: 20px; align-items: flex-start; }
+  .qr-wrap img { background: #fff; padding: 8px; border-radius: var(--r); width: 140px; flex-shrink: 0; }
+  .qr-url {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    word-break: break-all;
+    line-height: 1.6;
+  }
+
+  /* ─── LOG ─────────────────────────────────────────── */
+  .log-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    max-height: 280px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .log-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-type { color: var(--accent); min-width: 120px; flex-shrink: 0; }
+  .log-msg { color: var(--text); }
+
+  /* ─── GAME TIMER ──────────────────────────────────── */
+  .timer-display {
+    font-family: var(--mono);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 4px;
+    padding: 20px 0;
+    text-shadow: 0 0 20px rgba(57,211,83,0.4);
+  }
+  .timer-display.urgent { color: var(--red); text-shadow: 0 0 20px rgba(248,81,73,0.4); animation: urgentPulse 1s infinite; }
+  @keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  /* ─── CONFIRM MODAL ───────────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--red);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+    max-width: 400px;
+    width: 100%;
+    margin: 20px;
+  }
+  .modal h3 {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--red);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .modal p { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* ─── SCROLLBAR ───────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted2); }
+
+  /* ─── EMPTY STATE ─────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── INLINE ROW ──────────────────────────────────── */
+  .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .row .field { flex: 1; min-width: 120px; margin-bottom: 0; }
+  .row .btn { flex-shrink: 0; }
+
+  /* ─── TOAST ───────────────────────────────────────── */
+  #toastContainer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    max-width: 320px;
+    animation: slideIn 0.2s ease;
+  }
+  .toast.success { border-color: var(--accent); color: var(--accent); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  @keyframes slideIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+  /* ─── GAME STATUS BAR ─────────────────────────────── */
+  .game-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .game-bar .label { color: var(--muted); }
+  .game-bar .val { color: var(--text); font-weight: 600; }
+  .game-bar .sep { color: var(--border); }
+</style>
 </head>
 <body>
-  <h2>🔐 Вход для организатора</h2>
-  <input type="password" id="adminPass" placeholder="Пароль">
-  <button onclick="login()">Войти</button>
-  <p id="loginError" style="color:red"></p>
 
-  <div id="adminPanel" style="display:none;">
-    <h3>➕ Добавить взвод (Командира)</h3>
-    <select id="pTeam"><option value="red">🔴 Красные</option><option value="blue">🔵 Синие</option></select>
-    <input id="pId" placeholder="ID взвода (лат., напр. alpha)">
-    <input id="pName" placeholder="Название взвода">
-    <input id="pPass" type="password" placeholder="Пароль для входа командира">
-    <button onclick="createPlatoon()">Создать взвод</button>
-    
-    <div id="qrResult" style="margin-top:20px; display:none;">
-      <p>QR-код для командира (для показа солдатам):</p>
-      <img id="qrImage" src="" alt="QR Code" style="border:1px solid #ccc;">
-      <p><small>Ссылка: <span id="qrLink"></span></small></p>
+<div id="toastContainer"></div>
+
+<!-- ─── CONFIRM MODAL ─────────────────────────────── -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Подтвердите действие</h3>
+    <p id="confirmText"></p>
+    <div class="field" id="confirmInputWrap" style="display:none">
+      <label id="confirmInputLabel">Введите для подтверждения</label>
+      <input type="text" id="confirmInput" autocomplete="off">
     </div>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="closeConfirm()">Отмена</button>
+      <button class="btn btn-danger btn-sm" id="confirmOkBtn">Выполнить</button>
+    </div>
+  </div>
+</div>
 
-    <h3>👑 Игроки</h3>
-    <button onclick="clearAll()">🗑 Сбросить всех</button>
-    <h3>📜 Журнал событий</h3>
-    <ul id="logs" style="max-height:300px; overflow-y:auto;"></ul>
+<!-- ─── AUTH ─────────────────────────────────────────── -->
+<div class="shell" id="authView">
+  <div class="hdr">
+    <div class="hdr-logo">🛡️</div>
+    <div>
+      <div class="hdr-title">POLYGON</div>
+      <div class="hdr-sub">TACTICAL OPERATIONS CENTER</div>
+    </div>
+  </div>
+  <div class="auth-wrap">
+    <h2>// Авторизация</h2>
+    <div class="field">
+      <label>Пароль организатора</label>
+      <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-accent btn-block" onclick="adminLogin()">→ Войти в систему</button>
+    <div id="authError" style="margin-top:12px;color:var(--red);font-family:var(--mono);font-size:12px;display:none">
+      ⚠ Неверный пароль
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN ──────────────────────────────────────────── -->
+<div class="shell" id="mainView" style="display:none">
+
+  <div class="hdr">
+    <div class="hdr-logo">🛡️</div>
+    <div>
+      <div class="hdr-title">POLYGON</div>
+      <div class="hdr-sub">TACTICAL OPERATIONS CENTER</div>
+    </div>
+    <div class="hdr-status">
+      <div class="dot live" id="fbDot"></div>
+      <span id="fbStatus">FIREBASE LIVE</span>
+      <span class="sep" style="color:var(--border);margin:0 4px">|</span>
+      <span id="clockDisplay">--:--:--</span>
+    </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, push, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="stPlayers">0</div><div class="stat-label">Игроков</div></div>
+    <div class="stat"><div class="stat-val" id="stSquads">0</div><div class="stat-label">Взводов</div></div>
+    <div class="stat"><div class="stat-val" id="stPois">0</div><div class="stat-label">Точек</div></div>
+    <div class="stat"><div class="stat-val" id="stEvents">0</div><div class="stat-label">Событий</div></div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  <!-- GAME BAR -->
+  <div class="game-bar" id="gameBar">
+    <span class="label">ИГРА:</span>
+    <span class="val" id="gameStatusText">ОЖИДАНИЕ</span>
+    <span class="sep">|</span>
+    <span class="label">КРАСНЫЕ:</span>
+    <span class="val" style="color:var(--red)" id="scoreRed">0</span>
+    <span class="sep">|</span>
+    <span class="label">СИНИЕ:</span>
+    <span class="val" style="color:var(--blue)" id="scoreBlue">0</span>
+    <span class="sep">|</span>
+    <span class="val" id="timerMini">--:--</span>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('squads',this)">Взводы</button>
+    <button class="tab" onclick="switchTab('pois',this)">Точки</button>
+    <button class="tab" onclick="switchTab('players',this)">Игроки</button>
+    <button class="tab" onclick="switchTab('game',this)">Игра</button>
+    <button class="tab" onclick="switchTab('log',this)">Журнал</button>
+    <button class="tab" onclick="switchTab('danger',this)">⚠ Управление</button>
+  </div>
 
-    const ADMIN_PASSWORD = "admin123"; // Замените на свой пароль
+  <!-- TAB: SQUADS -->
+  <div class="tab-panel active" id="tab-squads">
+    <div class="card">
+      <div class="card-head"><span class="card-icon">➕</span><h2>Создать взвод</h2></div>
+      <div class="row">
+        <div class="field"><label>Название</label><input type="text" id="squadName" placeholder="Альфа"></div>
+        <div class="field"><label>Команда</label>
+          <select id="squadTeam">
+            <option value="red">🔴 Красные</option>
+            <option value="blue">🔵 Синие</option>
+          </select>
+        </div>
+        <button class="btn btn-accent" onclick="createSquad()">Создать</button>
+      </div>
+      <div class="qr-wrap" id="qrBox">
+        <img id="qrImg" src="">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px" id="qrSquadName"></div>
+          <div class="qr-url" id="qrUrl"></div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)">Покажите QR солдатам для вступления</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon">📋</span><h2>Взводы (<span id="squadCount">0</span>)</h2></div>
+      <div id="squadList"><div class="empty">// Взводов пока нет</div></div>
+    </div>
+  </div>
 
-    window.login = function() {
-      const password = document.getElementById('adminPass').value;
-      if (password === ADMIN_PASSWORD) {
-        document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('loginError').innerText = '';
-        startListening();
-      } else {
-        document.getElementById('loginError').innerText = 'Неверный пароль';
+  <!-- TAB: POI -->
+  <div class="tab-panel" id="tab-pois">
+    <div class="card">
+      <div class="card-head"><span class="card-icon">📍</span><h2>Создать точку интереса</h2></div>
+      <div class="row">
+        <div class="field"><label>Название</label><input type="text" id="poiName" placeholder="КП Альфа"></div>
+        <div class="field"><label>Тип</label>
+          <select id="poiType">
+            <option value="flag">🚩 Флаг (захватываемый)</option>
+            <option value="ammo">📦 Снабжение</option>
+            <option value="medic">🏥 Медпункт</option>
+            <option value="danger">⚠️ Опасная зона</option>
+            <option value="base">🏠 База</option>
+          </select>
+        </div>
+        <div class="field"><label>Видимость</label>
+          <select id="poiTeam">
+            <option value="all">Все</option>
+            <option value="red">🔴 Красные</option>
+            <option value="blue">🔵 Синие</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label>Широта</label><input type="number" step="any" id="poiLat" placeholder="55.7558"></div>
+        <div class="field"><label>Долгота</label><input type="number" step="any" id="poiLng" placeholder="37.6173"></div>
+        <div class="field"><label>Радиус захвата (м)</label><input type="number" id="poiRadius" value="30" min="5" max="500"></div>
+        <button class="btn btn-accent" onclick="createPOI()">Создать</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon">🗺️</span><h2>Точки (<span id="poiCount">0</span>)</h2></div>
+      <div id="poiList"><div class="empty">// Точек пока нет</div></div>
+    </div>
+  </div>
+
+  <!-- TAB: PLAYERS -->
+  <div class="tab-panel" id="tab-players">
+    <div class="card">
+      <div class="card-head"><span class="card-icon">👥</span><h2>Игроки онлайн</h2></div>
+      <div id="playerList"><div class="empty">// Нет игроков онлайн</div></div>
+    </div>
+  </div>
+
+  <!-- TAB: GAME -->
+  <div class="tab-panel" id="tab-game">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><span class="card-icon">⏱</span><h2>Таймер игры</h2></div>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="field">
+          <label>Длительность (минуты)</label>
+          <input type="number" id="gameDuration" value="45" min="1" max="300">
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn btn-accent btn-block" id="gameStartBtn" onclick="startGame()">▶ Начать игру</button>
+          <button class="btn btn-danger btn-block" id="gameStopBtn" onclick="stopGame()" style="display:none">■ Остановить</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-icon">🏆</span><h2>Счёт команд</h2></div>
+        <div style="display:flex;gap:16px;margin-bottom:20px">
+          <div class="stat" style="flex:1;border-color:rgba(248,81,73,0.4)">
+            <div class="stat-val" style="color:var(--red)" id="scoreRedBig">0</div>
+            <div class="stat-label">🔴 Красные</div>
+          </div>
+          <div class="stat" style="flex:1;border-color:rgba(88,166,255,0.4)">
+            <div class="stat-val" style="color:var(--blue)" id="scoreBlueBig">0</div>
+            <div class="stat-label">🔵 Синие</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7">
+          Очки начисляются автоматически при захвате флагов (тип: 🚩 Флаг). Каждый захват = +1 очко команде.
+        </div>
+        <button class="btn btn-sm" style="margin-top:14px" onclick="resetScore()">Сбросить счёт</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon">💬</span><h2>Вещание командиру / взводу</h2></div>
+      <div class="row">
+        <div class="field">
+          <label>Получатель</label>
+          <select id="msgTarget">
+            <option value="all">📢 Всем</option>
+            <option value="red">🔴 Красным</option>
+            <option value="blue">🔵 Синим</option>
+          </select>
+        </div>
+        <div class="field" style="flex:3">
+          <label>Сообщение</label>
+          <input type="text" id="msgText" placeholder="Внимание всем бойцам..." maxlength="200">
+        </div>
+        <button class="btn btn-blue" onclick="broadcastMsg()">📡 Отправить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LOG -->
+  <div class="tab-panel" id="tab-log">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-icon">📜</span>
+        <h2>Журнал событий</h2>
+        <button class="btn btn-sm" style="margin-left:auto" onclick="exportLog()">↓ Экспорт CSV</button>
+      </div>
+      <div class="log-wrap" id="logWrap">
+        <div class="empty">// Нет событий</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DANGER ZONE -->
+  <div class="tab-panel" id="tab-danger">
+    <div class="card" style="border-color:rgba(248,81,73,0.3)">
+      <div class="card-head"><span class="card-icon">⚠️</span><h2 style="color:var(--red)">Опасная зона</h2></div>
+      <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+        Действия ниже необратимы. Подтверждение обязательно.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-danger" onclick="confirmAction('players')">🗑 Сбросить игроков</button>
+        <button class="btn btn-danger" onclick="confirmAction('squads')">🗑 Удалить взводы</button>
+        <button class="btn btn-danger" onclick="confirmAction('pois')">🗑 Удалить точки</button>
+        <button class="btn btn-danger" onclick="confirmAction('all')">💥 СБРОСИТЬ ВСЁ</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-head"><span class="card-icon">🔐</span><h2>Смена пароля (сессия)</h2></div>
+      <div class="row">
+        <div class="field"><label>Новый пароль</label><input type="password" id="newPass" placeholder="••••••••"></div>
+        <button class="btn" onclick="changePass()">Сохранить</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px">
+        Сохраняется только в рамках текущей сессии браузера. Для постоянного пароля используйте config.js.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script>
+/* ─── КОНФИГ ─────────────────────────────────────────── */
+// Пароль задаётся в config.js как: const ADMIN_PASSWORD = 'yourpassword';
+// Если не задан — используется дефолтный (поменяйте!)
+let ADMIN_PASS = (typeof ADMIN_PASSWORD !== 'undefined') ? ADMIN_PASSWORD : 'polygon2024';
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let allEvents = [];
+let gameTimer = null;
+let gameEndTime = null;
+
+/* ─── TABS ─────────────────────────────────────────── */
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+/* ─── AUTH ─────────────────────────────────────────── */
+function adminLogin() {
+  const val = document.getElementById('adminPass').value;
+  if (val === ADMIN_PASS) {
+    document.getElementById('authView').style.display = 'none';
+    document.getElementById('mainView').style.display = 'block';
+    initListeners();
+    startClock();
+    toast('Добро пожаловать, командир', 'success');
+  } else {
+    document.getElementById('authError').style.display = 'block';
+    document.getElementById('adminPass').style.borderColor = 'var(--red)';
+    setTimeout(() => {
+      document.getElementById('authError').style.display = 'none';
+      document.getElementById('adminPass').style.borderColor = '';
+    }, 3000);
+  }
+}
+document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') adminLogin(); });
+
+function changePass() {
+  const p = document.getElementById('newPass').value.trim();
+  if (p.length < 6) return toast('Пароль слишком короткий (мин. 6)', 'error');
+  ADMIN_PASS = p;
+  document.getElementById('newPass').value = '';
+  toast('Пароль изменён в рамках сессии', 'success');
+}
+
+/* ─── CLOCK ─────────────────────────────────────────── */
+function startClock() {
+  function tick() {
+    document.getElementById('clockDisplay').textContent =
+      new Date().toLocaleTimeString('ru-RU');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ─── TOAST ─────────────────────────────────────────── */
+function toast(msg, type='success') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ─── CONFIRM MODAL ─────────────────────────────────── */
+let confirmCallback = null;
+function confirmAction(type) {
+  const cfg = {
+    players: {
+      title: 'Сбросить всех игроков?',
+      text: 'Все записи игроков будут удалены из базы данных. Активные сессии продолжат работу.',
+      word: null,
+      cb: () => db.ref('players').remove().then(() => toast('Игроки удалены'))
+    },
+    squads: {
+      title: 'Удалить все взводы?',
+      text: 'Все взводы будут удалены. QR-коды станут недействительными.',
+      word: null,
+      cb: () => db.ref('squads').remove().then(() => toast('Взводы удалены'))
+    },
+    pois: {
+      title: 'Удалить все точки?',
+      text: 'Все точки интереса и флаги будут удалены с карты.',
+      word: null,
+      cb: () => db.ref('pois').remove().then(() => toast('Точки удалены'))
+    },
+    all: {
+      title: '⚠ ПОЛНЫЙ СБРОС ДАННЫХ',
+      text: 'Будут удалены: все взводы, игроки, точки, события, счёт, состояние игры. Это необратимо.\n\nВведите слово СБРОС для подтверждения:',
+      word: 'СБРОС',
+      cb: () => {
+        db.ref('players').remove();
+        db.ref('squads').remove();
+        db.ref('pois').remove();
+        db.ref('events').remove();
+        db.ref('game').remove();
+        toast('База данных очищена', 'success');
       }
-    };
-
-    window.createPlatoon = async function() {
-      const team = document.getElementById('pTeam').value;
-      const platoonId = document.getElementById('pId').value;
-      const name = document.getElementById('pName').value;
-      const password = document.getElementById('pPass').value;
-
-      const joinToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      
-      await set(ref(db, `platoons/${team}/${platoonId}`), {
-        name, password, joinToken, team, platoonId, timestamp: Date.now()
-      });
-      
-      await push(ref(db, 'logs'), {
-        timestamp: Date.now(), type: 'info', message: `✅ Админ создал взвод "${name}" (${team})`
-      });
-
-      const joinUrl = `${window.location.origin}/index.html?action=join&team=${team}&platoon=${platoonId}&token=${joinToken}`;
-      document.getElementById('qrResult').style.display = 'block';
-      document.getElementById('qrLink').innerText = joinUrl;
-      document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(joinUrl)}`;
-    };
-
-    window.clearAll = async function() {
-      if(!confirm('Удалить всех игроков?')) return;
-      await remove(ref(db, 'players'));
-      await push(ref(db, 'logs'), {
-        timestamp: Date.now(), type: 'info', message: '🗑 Админ сбросил всех игроков'
-      });
-    };
-
-    function startListening() {
-      onValue(ref(db, 'logs'), (snapshot) => {
-        const logsObj = snapshot.val() || {};
-        const logs = Object.values(logsObj).sort((a, b) => a.timestamp - b.timestamp).slice(-40);
-        const logsList = document.getElementById('logs');
-        logsList.innerHTML = '';
-        logs.forEach(log => {
-          const li = document.createElement('li');
-          li.innerText = `[${new Date(log.timestamp).toLocaleTimeString()}] ${log.message}`;
-          logsList.appendChild(li);
-        });
-      });
     }
-  </script>
+  };
+  const c = cfg[type];
+  document.getElementById('confirmTitle').textContent = c.title;
+  document.getElementById('confirmText').textContent = c.text;
+  const wrap = document.getElementById('confirmInputWrap');
+  const inp = document.getElementById('confirmInput');
+  if (c.word) {
+    wrap.style.display = 'block';
+    inp.value = '';
+    inp.placeholder = 'Введите: ' + c.word;
+  } else {
+    wrap.style.display = 'none';
+  }
+  confirmCallback = () => {
+    if (c.word && inp.value !== c.word) {
+      toast('Неверное подтверждение', 'error');
+      return;
+    }
+    c.cb();
+    closeConfirm();
+  };
+  document.getElementById('confirmOkBtn').onclick = confirmCallback;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+  confirmCallback = null;
+}
+
+/* ─── INIT LISTENERS ─────────────────────────────────── */
+function initListeners() {
+  let squadCount = 0, playerCount = 0, poiCount = 0, eventCount = 0;
+
+  db.ref('squads').on('value', snap => {
+    squadCount = snap.numChildren();
+    document.getElementById('stSquads').textContent = squadCount;
+    document.getElementById('squadCount').textContent = squadCount;
+    const el = document.getElementById('squadList');
+    el.innerHTML = '';
+    if (!squadCount) { el.innerHTML = '<div class="empty">// Взводов пока нет</div>'; return; }
+    snap.forEach(ch => {
+      const s = ch.val();
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.innerHTML = `
+        <span class="badge ${s.team==='red'?'badge-red':'badge-blue'}">${s.team==='red'?'🔴 КРАСНЫЕ':'🔵 СИНИЕ'}</span>
+        <span class="list-item-name">${s.name}</span>
+        <span class="list-item-meta">${ch.key}</span>
+        <button class="btn btn-sm" onclick="showQR('${ch.key}','${s.name}','${s.team}')">QR</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSquad('${ch.key}')">✕</button>`;
+      el.appendChild(div);
+
+      // Populate msgTarget squad options
+      const sel = document.getElementById('msgTarget');
+      if (!sel.querySelector(`option[value="squad_${ch.key}"]`)) {
+        const opt = document.createElement('option');
+        opt.value = 'squad_' + ch.key;
+        opt.textContent = '📋 ' + s.name;
+        sel.appendChild(opt);
+      }
+    });
+  });
+
+  db.ref('pois').on('value', snap => {
+    poiCount = snap.numChildren();
+    document.getElementById('stPois').textContent = poiCount;
+    document.getElementById('poiCount').textContent = poiCount;
+    const el = document.getElementById('poiList');
+    el.innerHTML = '';
+    if (!poiCount) { el.innerHTML = '<div class="empty">// Точек пока нет</div>'; return; }
+    const icons = {flag:'🚩',ammo:'📦',medic:'🏥',danger:'⚠️',base:'🏠'};
+    snap.forEach(ch => {
+      const p = ch.val();
+      const captured = p.capturedBy ? `<span class="badge ${p.capturedBy==='red'?'badge-red':'badge-blue'}">${p.capturedBy==='red'?'🔴':'🔵'} Захвачен</span>` : '<span class="badge badge-muted">Нейтральный</span>';
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.innerHTML = `
+        <span style="font-size:18px">${icons[p.type]||'📍'}</span>
+        <span class="list-item-name">${p.name}</span>
+        ${captured}
+        <span class="list-item-meta">${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</span>
+        <button class="btn btn-danger btn-sm" onclick="deletePOI('${ch.key}')">✕</button>`;
+      el.appendChild(div);
+    });
+  });
+
+  db.ref('players').on('value', snap => {
+    playerCount = snap.numChildren();
+    document.getElementById('stPlayers').textContent = playerCount;
+    const el = document.getElementById('playerList');
+    el.innerHTML = '';
+    if (!playerCount) { el.innerHTML = '<div class="empty">// Нет игроков онлайн</div>'; return; }
+    snap.forEach(ch => {
+      const p = ch.val();
+      const isSOS = p.status === 'sos';
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.style.cssText = isSOS ? 'border-color:var(--red);background:var(--red-dim)' : '';
+      div.innerHTML = `
+        <span class="badge ${p.team==='red'?'badge-red':'badge-blue'}">${p.role==='commander'?'👑':'🎖️'}</span>
+        <span class="list-item-name">${p.name}</span>
+        <span class="list-item-meta">${p.squad}</span>
+        <span class="badge ${isSOS?'badge-red':p.status==='online'?'badge-green':'badge-muted'}">${isSOS?'🆘 SOS':p.status}</span>
+        <span class="list-item-meta">${p.lat?p.lat.toFixed(4):'?'}, ${p.lng?p.lng.toFixed(4):'?'}</span>
+        ${isSOS?`<button class="btn btn-sm btn-accent" onclick="clearSOS('${ch.key}')">✓ Принято</button>`:''}`;
+      el.appendChild(div);
+    });
+  });
+
+  db.ref('events').on('value', snap => {
+    allEvents = [];
+    eventCount = snap.numChildren();
+    document.getElementById('stEvents').textContent = eventCount;
+    snap.forEach(ch => allEvents.unshift({ id: ch.key, ...ch.val() }));
+    renderLog(allEvents.slice(0, 100));
+  });
+
+  db.ref('game').on('value', snap => {
+    const g = snap.val() || {};
+    updateGameUI(g);
+  });
+}
+
+/* ─── SQUADS ─────────────────────────────────────────── */
+function genId() { return Math.random().toString(36).slice(2,7).toUpperCase(); }
+
+async function createSquad() {
+  const name = document.getElementById('squadName').value.trim();
+  const team = document.getElementById('squadTeam').value;
+  if (!name) return toast('Введи название взвода', 'error');
+  const id = genId();
+  await db.ref('squads/' + id).set({ name, team, createdAt: Date.now() });
+  document.getElementById('squadName').value = '';
+  db.ref('events').push({ type: 'SQUAD_CREATED', squad: id, name, team, time: Date.now() });
+  showQR(id, name, team);
+  toast('Взвод "' + name + '" создан: ' + id, 'success');
+}
+
+function showQR(id, name, team) {
+  const url = location.origin + location.pathname.replace('admin.html','index.html') + '?squad=' + id;
+  const box = document.getElementById('qrBox');
+  document.getElementById('qrSquadName').textContent = `${team==='red'?'🔴':'🔵'} ${name} [${id}]`;
+  document.getElementById('qrUrl').textContent = url;
+  box.classList.add('show');
+  QRCode.toDataURL(url, { width: 280, margin: 1 }, (e, dataUrl) => {
+    document.getElementById('qrImg').src = dataUrl;
+  });
+}
+
+function deleteSquad(id) {
+  db.ref('squads/' + id).remove();
+  db.ref('events').push({ type: 'SQUAD_DELETED', squad: id, time: Date.now() });
+  toast('Взвод удалён');
+}
+
+/* ─── POI ────────────────────────────────────────────── */
+async function createPOI() {
+  const name = document.getElementById('poiName').value.trim();
+  const lat = parseFloat(document.getElementById('poiLat').value);
+  const lng = parseFloat(document.getElementById('poiLng').value);
+  const type = document.getElementById('poiType').value;
+  const team = document.getElementById('poiTeam').value;
+  const radius = parseInt(document.getElementById('poiRadius').value) || 30;
+  if (!name || isNaN(lat) || isNaN(lng)) return toast('Заполни название и координаты', 'error');
+  await db.ref('pois').push({ name, lat, lng, type, team, radius, capturedBy: null, captureStartedAt: null, createdAt: Date.now() });
+  ['poiName','poiLat','poiLng'].forEach(id => document.getElementById(id).value = '');
+  db.ref('events').push({ type: 'POI_CREATED', name, team, time: Date.now() });
+  toast('Точка "' + name + '" добавлена', 'success');
+}
+
+function deletePOI(key) {
+  db.ref('pois/' + key).remove();
+  toast('Точка удалена');
+}
+
+/* ─── SOS ────────────────────────────────────────────── */
+function clearSOS(playerId) {
+  db.ref('players/' + playerId).update({ status: 'online', updatedAt: Date.now() });
+  db.ref('events').push({ type: 'SOS_CLEARED', player: playerId, time: Date.now() });
+  toast('SOS снят', 'success');
+}
+
+/* ─── GAME TIMER ─────────────────────────────────────── */
+function startGame() {
+  const dur = parseInt(document.getElementById('gameDuration').value) || 45;
+  const endTime = Date.now() + dur * 60000;
+  db.ref('game').update({ status: 'running', startedAt: Date.now(), endTime, duration: dur });
+  db.ref('events').push({ type: 'GAME_STARTED', duration: dur, time: Date.now() });
+  toast('Игра началась! Длительность: ' + dur + ' мин', 'success');
+}
+
+function stopGame() {
+  db.ref('game').update({ status: 'stopped', stoppedAt: Date.now() });
+  db.ref('events').push({ type: 'GAME_STOPPED', time: Date.now() });
+  if (gameTimer) clearInterval(gameTimer);
+  document.getElementById('timerDisplay').textContent = '00:00';
+  toast('Игра остановлена');
+}
+
+function updateGameUI(g) {
+  const statusEl = document.getElementById('gameStatusText');
+  const startBtn = document.getElementById('gameStartBtn');
+  const stopBtn = document.getElementById('gameStopBtn');
+  const scoreRed = g.scoreRed || 0;
+  const scoreBlue = g.scoreBlue || 0;
+  ['scoreRedBig','scoreRed'].forEach(id => document.getElementById(id).textContent = scoreRed);
+  ['scoreBlueBig','scoreBlue'].forEach(id => document.getElementById(id).textContent = scoreBlue);
+
+  if (g.status === 'running') {
+    statusEl.textContent = 'В ИГРЕ';
+    statusEl.style.color = 'var(--accent)';
+    startBtn.style.display = 'none';
+    stopBtn.style.display = '';
+    gameEndTime = g.endTime;
+    if (gameTimer) clearInterval(gameTimer);
+    gameTimer = setInterval(tickTimer, 1000);
+    tickTimer();
+  } else {
+    statusEl.textContent = g.status === 'stopped' ? 'ЗАВЕРШЕНА' : 'ОЖИДАНИЕ';
+    statusEl.style.color = g.status === 'stopped' ? 'var(--red)' : 'var(--muted)';
+    startBtn.style.display = '';
+    stopBtn.style.display = 'none';
+    if (gameTimer) clearInterval(gameTimer);
+    document.getElementById('timerMini').textContent = '--:--';
+  }
+}
+
+function tickTimer() {
+  if (!gameEndTime) return;
+  const rem = Math.max(0, gameEndTime - Date.now());
+  const m = Math.floor(rem / 60000);
+  const s = Math.floor((rem % 60000) / 1000);
+  const str = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = str;
+  document.getElementById('timerMini').textContent = str;
+  const disp = document.getElementById('timerDisplay');
+  if (rem < 60000) disp.classList.add('urgent'); else disp.classList.remove('urgent');
+  if (rem === 0) {
+    db.ref('game').update({ status: 'stopped', stoppedAt: Date.now() });
+    db.ref('events').push({ type: 'GAME_OVER', time: Date.now() });
+    clearInterval(gameTimer);
+    toast('Время вышло! Игра окончена', 'success');
+  }
+}
+
+function resetScore() {
+  db.ref('game').update({ scoreRed: 0, scoreBlue: 0 });
+  toast('Счёт сброшен');
+}
+
+/* ─── BROADCAST ──────────────────────────────────────── */
+function broadcastMsg() {
+  const target = document.getElementById('msgTarget').value;
+  const text = document.getElementById('msgText').value.trim();
+  if (!text) return toast('Напиши сообщение', 'error');
+  db.ref('messages').push({ target, text, from: 'ADMIN', time: Date.now() });
+  db.ref('events').push({ type: 'BROADCAST', name: text, team: target, time: Date.now() });
+  document.getElementById('msgText').value = '';
+  toast('Сообщение отправлено: ' + target, 'success');
+}
+
+/* ─── LOG ────────────────────────────────────────────── */
+function renderLog(events) {
+  const el = document.getElementById('logWrap');
+  if (!events.length) { el.innerHTML = '<div class="empty">// Нет событий</div>'; return; }
+  el.innerHTML = '';
+  const typeColors = {
+    SOS: 'var(--red)',
+    GAME_STARTED: 'var(--accent)',
+    GAME_OVER: 'var(--amber)',
+    BROADCAST: 'var(--blue)',
+    SQUAD_CREATED: 'var(--accent)',
+    POI_CREATED: 'var(--blue)',
+    FLAG_CAPTURED: 'var(--amber)',
+  };
+  events.forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'log-row';
+    const t = new Date(e.time).toLocaleTimeString('ru-RU');
+    row.innerHTML = `
+      <span class="log-time">${t}</span>
+      <span class="log-type" style="color:${typeColors[e.type]||'var(--accent)'}">${e.type}</span>
+      <span class="log-msg">${e.player||e.name||e.squad||''}</span>`;
+    el.appendChild(row);
+  });
+}
+
+function exportLog() {
+  if (!allEvents.length) return toast('Нет событий для экспорта', 'error');
+  const header = 'Время,Тип,Данные,Team\n';
+  const rows = allEvents.map(e =>
+    `"${new Date(e.time).toLocaleString('ru-RU')}","${e.type}","${e.player||e.name||e.squad||''}","${e.team||''}"`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF'+header+rows], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'polygon_events_' + Date.now() + '.csv';
+  a.click();
+  toast('Лог экспортирован', 'success');
+}
+</script>
 </body>
 </html>

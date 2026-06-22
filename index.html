@@ -1,234 +1,544 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Карта полигона</title>
-  <style>
-    body { font-family: sans-serif; padding: 15px; text-align: center; }
-    .hidden { display: none !important; }
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 90%; }
-    button { padding: 10px 15px; margin: 5px; cursor: pointer; }
-    input, select { padding: 8px; margin: 5px; width: 80%; max-width: 300px; }
-    #mapContainer { height: 60vh; background: #e0e0e0; margin-top: 10px; border: 1px solid #999; overflow-y: auto; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLYGON // TACTICAL MAP</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #0a0e0a;
+    --bg2: #111614;
+    --bg3: #1a2018;
+    --border: #2a3a2a;
+    --accent: #d4a017;
+    --green: #4ade80;
+    --red: #ef4444;
+    --blue: #60a5fa;
+    --text: #c8d4c8;
+    --dim: #6a7a6a;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  body {
+    margin: 0; font-family: var(--mono);
+    background: var(--bg); color: var(--text);
+    overflow: hidden;
+  }
+  #map {
+    position: absolute; inset: 0; z-index: 1;
+    background: #000;
+    filter: saturate(0.3) brightness(0.7) contrast(1.1);
+  }
+  .leaflet-container { background: #000 !important; font-family: var(--mono); }
+  .leaflet-popup-content-wrapper {
+    background: var(--bg2); color: var(--text);
+    border: 1px solid var(--accent); border-radius: 0;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .leaflet-popup-tip { background: var(--bg2); }
+  .leaflet-control-zoom a {
+    background: var(--bg2) !important; color: var(--accent) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* ===== СТАТУС-БАР ===== */
+  #topBar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,14,10,0.92);
+    border-bottom: 1px solid var(--accent);
+    padding: 6px 12px; font-size: 11px;
+    display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(4px);
+  }
+  #topBar .logo { color: var(--accent); font-weight: bold; letter-spacing: 2px; }
+  #topBar .stats { display: flex; gap: 16px; }
+  #topBar .stat { color: var(--dim); }
+  #topBar .stat b { color: var(--green); }
+  #topBar .stat.red b { color: var(--red); }
+  #topBar .stat.blue b { color: var(--blue); }
+  #clock { color: var(--accent); }
+
+  /* ===== ПАНЕЛЬ ===== */
+  .panel {
+    position: absolute; top: 36px; left: 10px; z-index: 1000;
+    background: rgba(10,14,10,0.95);
+    border: 1px solid var(--accent);
+    width: 340px; max-height: calc(100vh - 50px);
+    overflow-y: auto; backdrop-filter: blur(6px);
+    box-shadow: 0 0 30px rgba(212,160,23,0.15);
+  }
+  .panel-header {
+    background: var(--bg3);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--accent);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel-header h2 {
+    margin: 0; font-size: 13px; color: var(--accent);
+    letter-spacing: 2px; font-weight: bold;
+  }
+  .panel-header .close {
+    background: none; border: 1px solid var(--border);
+    color: var(--dim); width: 24px; height: 24px;
+    cursor: pointer; font-family: var(--mono);
+  }
+  .panel-header .close:hover { color: var(--red); border-color: var(--red); }
+  .panel-body { padding: 14px; }
+
+  .section {
+    border: 1px solid var(--border);
+    margin-bottom: 12px; padding: 10px;
+    background: var(--bg2);
+  }
+  .section-title {
+    color: var(--accent); font-size: 11px;
+    letter-spacing: 1px; margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px dashed var(--border);
+  }
+  .section-title::before { content: "// "; color: var(--dim); }
+
+  input, select, button, textarea {
+    width: 100%; padding: 8px 10px; margin: 4px 0;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  button {
+    background: var(--bg3); color: var(--accent);
+    cursor: pointer; letter-spacing: 1px;
+    text-transform: uppercase; font-weight: bold;
+    transition: all 0.15s;
+  }
+  button:hover {
+    background: var(--accent); color: var(--bg);
+    border-color: var(--accent);
+  }
+  button.danger { color: var(--red); border-color: #5a2020; }
+  button.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+  button.warn { color: #fbbf24; border-color: #5a4020; }
+  button.warn:hover { background: #fbbf24; color: #000; border-color: #fbbf24; }
+
+  .hidden { display: none !important; }
+  .team-red { color: var(--red); }
+  .team-blue { color: var(--blue); }
+
+  /* ===== МАРКЕРЫ ===== */
+  .poi-icon, .soldier-icon { background: none !important; border: none !important; }
+  .poi-marker {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    background: rgba(10,14,10,0.85);
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(212,160,23,0.4);
+  }
+  .soldier-marker {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 8px rgba(0,0,0,0.8);
+  }
+  .soldier-marker.red { background: var(--red); }
+  .soldier-marker.blue { background: var(--blue); }
+  .soldier-marker.sos {
+    animation: pulse 0.8s infinite;
+    background: #fff !important; color: var(--red);
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.8); }
+    50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+  }
+
+  /* ===== СПИСКИ ===== */
+  .list-item {
+    padding: 6px 8px; margin: 3px 0;
+    background: var(--bg); border-left: 2px solid var(--border);
+    font-size: 11px; display: flex; justify-content: space-between;
+  }
+  .list-item.red { border-left-color: var(--red); }
+  .list-item.blue { border-left-color: var(--blue); }
+  .list-item .status { color: var(--dim); font-size: 10px; }
+  .list-item .status.sos { color: var(--red); font-weight: bold; }
+
+  /* ===== КНОПКА ПАНЕЛИ ===== */
+  #togglePanel {
+    position: absolute; top: 44px; left: 10px; z-index: 999;
+    width: 36px; height: 36px;
+    background: var(--bg2); border: 1px solid var(--accent);
+    color: var(--accent); cursor: pointer;
+    font-family: var(--mono); font-size: 16px;
+  }
+
+  /* ===== QR МОДАЛКА ===== */
+  #qrModal {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+  #qrModal .box {
+    background: var(--bg2); border: 1px solid var(--accent);
+    padding: 20px; max-width: 340px; text-align: center;
+  }
+  #qrModal h3 {
+    color: var(--accent); margin: 0 0 12px;
+    font-size: 13px; letter-spacing: 2px;
+  }
+  #qrModal img {
+    background: #fff; padding: 8px; max-width: 100%;
+  }
+  #qrModal .link {
+    font-size: 10px; color: var(--dim);
+    word-break: break-all; margin-top: 10px;
+    padding: 6px; background: var(--bg); border: 1px solid var(--border);
+  }
+  #qrModal button { margin-top: 12px; }
+
+  /* ===== СКРОЛЛ ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ===== АДАПТИВ ===== */
+  @media (max-width: 600px) {
+    .panel { width: calc(100% - 20px); }
+    #topBar { font-size: 10px; padding: 4px 8px; }
+    #topBar .stats { gap: 8px; }
+  }
+</style>
 </head>
 <body>
-  <h2>Карта полигона</h2>
-  
-  <div id="loginScreen">
-    <h3>Вход на полигон</h3>
-    <div id="joinForm" class="hidden">
-      <p>Вступление во взвод по QR-коду</p>
-      <input type="text" id="joinNick" placeholder="Ваш позывной">
-      <button onclick="joinPlatoon()">Вступить</button>
-    </div>
-    
-    <div id="normalLogin">
-      <select id="loginTeam"><option value="red">🔴 Красные</option><option value="blue">🔵 Синие</option></select>
-      <input type="text" id="loginNick" placeholder="Ваш позывной">
-      <button onclick="loginAsSoldier()">Войти как солдат</button>
-      <hr>
-      <h4>Вход для командира взвода</h4>
-      <select id="cmdTeam"><option value="red">🔴 Красные</option><option value="blue">🔵 Синие</option></select>
-      <input type="text" id="cmdPlatoonId" placeholder="ID взвода">
-      <input type="password" id="cmdPass" placeholder="Пароль взвода">
-      <button onclick="loginAsCommander()">Войти как командир</button>
-    </div>
+
+<div id="map"></div>
+
+<!-- ===== СТАТУС-БАР ===== -->
+<div id="topBar">
+  <div class="logo">◢ POLYGON // TACTICAL MAP ◣</div>
+  <div class="stats">
+    <span class="stat">ИГРА: <b id="gameStatus">ОЖИДАНИЕ</b></span>
+    <span class="stat red">КР: <b id="redCount">0</b></span>
+    <span class="stat blue">СН: <b id="blueCount">0</b></span>
+    <span class="stat" id="coordStat">GPS: <b>--</b></span>
+    <span id="clock">--:--:--</span>
   </div>
+</div>
 
-  <div id="mapScreen" class="hidden">
-    <h3 id="userRoleDisplay"></h3>
-    <button id="showQrBtn" class="hidden" onclick="document.getElementById('qrModal').classList.remove('hidden')">📱 Показать QR-код для солдат</button>
-    <button onclick="sendSOS()">SOS</button>
-    <button onclick="logout()">Выйти</button>
-    
-    <div id="mapContainer">
-      <h4>Видимые объекты:</h4>
-      <div id="entitiesList" style="text-align: left; padding: 10px;"></div>
-    </div>
+<!-- ===== КНОПКА ОТКРЫТИЯ ===== -->
+<button id="togglePanel" class="hidden" onclick="document.getElementById('sidePanel').classList.remove('hidden');this.classList.add('hidden')">◢</button>
+
+<!-- ===== БОКОВАЯ ПАНЕЛЬ ===== -->
+<div class="panel" id="sidePanel">
+  <div class="panel-header">
+    <h2>◢ ОПЕРАТОР ◣</h2>
+    <button class="close" onclick="document.getElementById('sidePanel').classList.add('hidden');document.getElementById('togglePanel').classList.remove('hidden')">✕</button>
   </div>
+  <div class="panel-body">
 
-  <div id="qrModal" class="modal hidden">
-    <div class="modal-content">
-      <h3>Отсканируйте для вступления во взвод</h3>
-      <img id="cmdQrImage" src="" style="max-width: 250px;">
-      <br><br>
-      <button onclick="document.getElementById('qrModal').classList.add('hidden')">Закрыть</button>
+    <!-- ВХОД -->
+    <div id="loginPanel">
+      <div class="section">
+        <div class="section-title">ВХОД НА ПОЛИГОН</div>
+        <div style="color:var(--dim);font-size:10px;margin-bottom:8px;">
+          // Авторизуйтесь для подключения к тактической сети
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">ВСТУПЛЕНИЕ ПО QR</div>
+        <input type="text" id="joinCode" placeholder="Код взвода">
+        <button onclick="joinByCode()">▸ Вступить</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">СОЛДАТ</div>
+        <input type="text" id="soldierName" placeholder="Позывной">
+        <select id="soldierTeam">
+          <option value="red">🔴 КРАСНЫЕ</option>
+          <option value="blue">🔵 СИНИЕ</option>
+        </select>
+        <button onclick="loginSoldier()">▸ Войти как солдат</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">КОМАНДИР ВЗВОДА</div>
+        <input type="text" id="cmdSquad" placeholder="ID взвода">
+        <select id="cmdTeam">
+          <option value="red">🔴 КРАСНЫЕ</option>
+          <option value="blue">🔵 СИНИЕ</option>
+        </select>
+        <button onclick="loginCommander()">▸ Войти как командир</button>
+      </div>
     </div>
+
+    <!-- СОЛДАТ -->
+    <div id="soldierPanel" class="hidden">
+      <div class="section">
+        <div class="section-title">ОПЕРАТОР</div>
+        <div style="font-size:13px;">
+          <span style="color:var(--accent)">ПОЗЫВНОЙ:</span> <b id="sName"></b> <span id="sTeam"></span><br>
+          <span style="color:var(--accent)">ВЗВОД:</span> <b id="sSquad"></b><br>
+          <span style="color:var(--accent)">СТАТУС:</span> <span id="sStatus" style="color:var(--green)">В СТРОЮ</span>
+        </div>
+      </div>
+      <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
+      <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
+
+      <div class="section">
+        <div class="section-title">ОБЪЕКТЫ В ЗОНЕ ВИДИМОСТИ</div>
+        <div id="visibleList"><div style="color:var(--dim);font-size:11px">// Нет данных</div></div>
+      </div>
+    </div>
+
+    <!-- КОМАНДИР -->
+    <div id="commanderPanel" class="hidden">
+      <div class="section">
+        <div class="section-title">КОМАНДИР</div>
+        <div style="font-size:13px;">
+          <span style="color:var(--accent)">КОМАНДУЮ:</span> <span id="cTeam"></span><br>
+          <span style="color:var(--accent)">ВЗВОД:</span> <b id="cSquad"></b>
+        </div>
+      </div>
+      <button onclick="showQR()">📱 QR ДЛЯ БОЙЦОВ</button>
+      <button class="warn" onclick="sendSOS()">🆘 SOS — ТРЕВОГА</button>
+      <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
+
+      <div class="section">
+        <div class="section-title">БОЙЦЫ ВЗВОДА</div>
+        <div id="squadList"><div style="color:var(--dim);font-size:11px">// Нет бойцов</div></div>
+      </div>
+    </div>
+
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, update, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!-- ===== QR МОДАЛКА ===== -->
+<div id="qrModal" class="hidden">
+  <div class="box">
+    <h3>◢ QR ДЛЯ ВСТУПЛЕНИЯ ◣</h3>
+    <img id="qrImg" src="">
+    <div class="link" id="qrLink"></div>
+    <button onclick="document.getElementById('qrModal').classList.add('hidden')">✕ ЗАКРЫТЬ</button>
+  </div>
+</div>
 
-	const firebaseConfig = {
-		apiKey: "AIzaSyAZRbc37dj2vaiACjAsD0mXUfyne_Wd9gw",
-		authDomain: "lordinsxtest.firebaseapp.com",
-		databaseURL: "https://lordinsxtest-default-rtdb.europe-west1.firebasedatabase.app",
-		projectId: "lordinsxtest",
-		storageBucket: "lordinsxtest.firebasestorage.app",
-		messagingSenderId: "611910355892",
-		appId: "1:611910355892:web:c6ecbd24579c8ee95800e1"
-	};
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script>
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const map = L.map('map', { zoomControl: true }).setView([55.7558, 37.6173], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OSM', maxZoom: 19
+}).addTo(map);
 
-    window.db = db;
-    window.ref = ref;
-    window.onValue = onValue;
-    window.set = set;
-    window.update = update;
-    window.push = push;
-    window.get = get;
+const soldiersLayer = L.layerGroup().addTo(map);
+const poisLayer = L.layerGroup().addTo(map);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    let myRole = localStorage.getItem('role');
-    let myTeam = localStorage.getItem('team');
-    let myPlatoonId = localStorage.getItem('platoonId');
-    let myName = localStorage.getItem('nick');
-    let joinToken = localStorage.getItem('joinToken');
+let me = null;
+let watchId = null;
+let listeners = [];
 
-    let playersData = {};
-    let platoonsData = {};
+const teamEmoji = { red: '🔴', blue: '🔵' };
+const poiIcons = { flag: '🚩', ammo: '📦', medic: '🏥', danger: '⚠️', base: '🏠' };
 
-    if (urlParams.get('action') === 'join') {
-      document.getElementById('normalLogin').classList.add('hidden');
-      document.getElementById('joinForm').classList.remove('hidden');
-      localStorage.setItem('pendingTeam', urlParams.get('team'));
-      localStorage.setItem('pendingPlatoon', urlParams.get('platoon'));
-      localStorage.setItem('pendingToken', urlParams.get('token'));
-    } else if (myRole) {
-      showMap();
-    }
+// ===== ЧАСЫ =====
+setInterval(() => {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toTimeString().slice(0,8);
+}, 1000);
 
-    window.joinPlatoon = async function() {
-      const nick = document.getElementById('joinNick').value;
-      const team = localStorage.getItem('pendingTeam');
-      const platoonId = localStorage.getItem('pendingPlatoon');
-      const token = localStorage.getItem('pendingToken');
+// ===== ВХОД =====
+function loginSoldier() {
+  const name = document.getElementById('soldierName').value.trim();
+  const team = document.getElementById('soldierTeam').value;
+  if (!name) return alert('// ВВЕДИТЕ ПОЗЫВНОЙ');
+  me = { id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), name, team, squad: 'free', role: 'soldier' };
+  startSession();
+}
 
-      const snapshot = await get(ref(db, `platoons/${team}/${platoonId}`));
-      const platoon = snapshot.val();
-      
-      if (platoon && platoon.joinToken === token) {
-        const newPlayerRef = push(ref(db, `players/${team}`));
-        await set(newPlayerRef, {
-          id: newPlayerRef.key, nick, team, platoonId, role: 'soldier', timestamp: Date.now()
-        });
-        await push(ref(db, 'logs'), {
-          timestamp: Date.now(), type: 'info', message: `👤 ${nick} вступил во взвод "${platoon.name}" (${team})`
-        });
-        localStorage.setItem('role', 'soldier');
-        localStorage.setItem('team', team);
-        localStorage.setItem('platoonId', platoonId);
-        localStorage.setItem('nick', nick);
-        window.location.href = window.location.pathname;
-      } else {
-        alert('Неверная ссылка или срок действия истек');
-      }
-    };
+function loginCommander() {
+  const squad = document.getElementById('cmdSquad').value.trim();
+  const team = document.getElementById('cmdTeam').value;
+  if (!squad) return alert('// ВВЕДИТЕ ID ВЗВОДА');
+  me = { id: 'c_' + squad, name: 'Командир', team, squad, role: 'commander' };
+  startSession();
+}
 
-    window.loginAsSoldier = function() {
-      const nick = document.getElementById('loginNick').value;
-      const team = document.getElementById('loginTeam').value;
-      localStorage.setItem('role', 'soldier');
-      localStorage.setItem('team', team);
-      localStorage.setItem('nick', nick);
-      showMap();
-    };
+async function joinByCode() {
+  const code = document.getElementById('joinCode').value.trim();
+  if (!code) return alert('// ВВЕДИТЕ КОД');
+  try {
+    const snap = await db.ref('squads/' + code).once('value');
+    if (!snap.exists()) return alert('// ВЗВОД НЕ НАЙДЕН');
+    const squad = snap.val();
+    const name = prompt('// ПОЗЫВНОЙ:');
+    if (!name) return;
+    me = { id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), name, team: squad.team, squad: code, role: 'soldier' };
+    startSession();
+  } catch(e) { alert('// ОШИБКА: ' + e.message); }
+}
 
-    window.loginAsCommander = async function() {
-      const team = document.getElementById('cmdTeam').value;
-      const platoonId = document.getElementById('cmdPlatoonId').value;
-      const password = document.getElementById('cmdPass').value;
+function startSession() {
+  localStorage.setItem('me', JSON.stringify(me));
+  document.getElementById('loginPanel').classList.add('hidden');
+  if (me.role === 'commander') {
+    document.getElementById('commanderPanel').classList.remove('hidden');
+    document.getElementById('cTeam').textContent = teamEmoji[me.team] + ' ' + me.team.toUpperCase();
+    document.getElementById('cSquad').textContent = me.squad;
+  } else {
+    document.getElementById('soldierPanel').classList.remove('hidden');
+    document.getElementById('sName').textContent = me.name;
+    document.getElementById('sTeam').textContent = teamEmoji[me.team];
+    document.getElementById('sSquad').textContent = me.squad;
+  }
+  document.getElementById('gameStatus').textContent = me.team.toUpperCase();
+  registerPlayer();
+  startGeolocation();
+  subscribeToPOIs();
+  subscribeToSoldiers();
+}
 
-      const snapshot = await get(ref(db, `platoons/${team}/${platoonId}`));
-      const platoon = snapshot.val();
-      
-      if (platoon && platoon.password === password) {
-        await update(ref(db, `platoons/${team}/${platoonId}`), { lastActive: Date.now() });
-        localStorage.setItem('role', 'commander');
-        localStorage.setItem('team', team);
-        localStorage.setItem('platoonId', platoonId);
-        localStorage.setItem('nick', platoon.name);
-        localStorage.setItem('joinToken', platoon.joinToken);
-        showMap();
-      } else {
-        alert('Неверный ID взвода или пароль');
-      }
-    };
+function logout() {
+  if (!confirm('// ПОДТВЕРДИТЕ ОТКЛЮЧЕНИЕ')) return;
+  if (me) db.ref('players/' + me.id).remove();
+  listeners.forEach(l => l.ref.off());
+  listeners = [];
+  if (watchId) navigator.geolocation.clearWatch(watchId);
+  localStorage.removeItem('me');
+  location.reload();
+}
 
-    function showMap() {
-      myRole = localStorage.getItem('role');
-      myTeam = localStorage.getItem('team');
-      myPlatoonId = localStorage.getItem('platoonId');
-      myName = localStorage.getItem('nick');
-      joinToken = localStorage.getItem('joinToken');
+// ===== РЕГИСТРАЦИЯ =====
+function registerPlayer() {
+  const ref = db.ref('players/' + me.id);
+  ref.set({
+    name: me.name, team: me.team, squad: me.squad, role: me.role,
+    lat: 0, lng: 0, status: 'online', updatedAt: Date.now()
+  });
+  ref.onDisconnect().update({ status: 'offline', updatedAt: Date.now() });
+}
 
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('mapScreen').classList.remove('hidden');
-      
-      const roleText = myRole === 'commander' ? `👑 Командир: ${myName}` : `👤 Солдат: ${myName}`;
-      document.getElementById('userRoleDisplay').innerText = roleText;
+// ===== ГЕОЛОКАЦИЯ =====
+function startGeolocation() {
+  if (!navigator.geolocation) return alert('// GPS НЕ ПОДДЕРЖИВАЕТСЯ');
+  watchId = navigator.geolocation.watchPosition(pos => {
+    const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+    db.ref('players/' + me.id).update({ lat, lng, updatedAt: Date.now() });
+    document.getElementById('coordStat').innerHTML =
+      `GPS: <b>${lat.toFixed(4)}, ${lng.toFixed(4)}</b>`;
+    if (map.getZoom() < 14) map.setView([lat, lng], 16);
+  }, err => {
+    console.warn('// GPS ERR:', err);
+    document.getElementById('coordStat').innerHTML = `GPS: <b style="color:var(--red)">ОШИБКА</b>`;
+  }, { enableHighAccuracy: true, maximumAge: 5000 });
+}
 
-      if (myRole === 'commander' && joinToken) {
-        document.getElementById('showQrBtn').classList.remove('hidden');
-        const joinUrl = `${window.location.origin}/index.html?action=join&team=${myTeam}&platoon=${myPlatoonId}&token=${joinToken}`;
-        document.getElementById('cmdQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(joinUrl)}`;
-      }
-
-      onValue(ref(db, 'players'), (snapshot) => {
-        playersData = snapshot.val() || {};
-        renderMap();
+// ===== POI =====
+function subscribeToPOIs() {
+  const ref = db.ref('pois');
+  listeners.push({ ref });
+  ref.on('value', snap => {
+    poisLayer.clearLayers();
+    snap.forEach(ch => {
+      const p = ch.val();
+      if (p.team !== 'all' && p.team !== me.team) return;
+      const icon = L.divIcon({
+        html: `<div class="poi-marker">${poiIcons[p.type] || '📍'}</div>`,
+        className: 'poi-icon', iconSize: [32, 32], iconAnchor: [16, 16]
       });
+      L.marker([p.lat, p.lng], { icon })
+        .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br><span style="color:var(--dim)">${p.type.toUpperCase()} | ${p.team.toUpperCase()}</span><br>${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`)
+        .addTo(poisLayer);
+    });
+  });
+}
 
-      onValue(ref(db, 'platoons'), (snapshot) => {
-        platoonsData = snapshot.val() || {};
-        renderMap();
+// ===== СОЛДАТЫ =====
+function subscribeToSoldiers() {
+  const ref = db.ref('players');
+  listeners.push({ ref });
+  ref.on('value', snap => {
+    soldiersLayer.clearLayers();
+    const listEl = me.role === 'commander' ? document.getElementById('squadList') : document.getElementById('visibleList');
+    listEl.innerHTML = '';
+    let redC = 0, blueC = 0;
+
+    snap.forEach(ch => {
+      const p = ch.val();
+      if (p.team === 'red') redC++;
+      if (p.team === 'blue') blueC++;
+      if (p.team !== me.team) return;
+      if (me.role === 'commander' && p.squad !== me.squad) return;
+      if (!p.lat || !p.lng || (p.lat === 0 && p.lng === 0)) return;
+
+      const isSOS = p.status === 'sos';
+      const marker = p.role === 'commander' ? '👑' : '🎖️';
+      const cls = isSOS ? 'sos' : p.team;
+      const icon = L.divIcon({
+        html: `<div class="soldier-marker ${cls}">${isSOS ? '🆘' : marker}</div>`,
+        className: 'soldier-icon', iconSize: [32, 32], iconAnchor: [16, 16]
       });
+      L.marker([p.lat, p.lng], { icon })
+        .bindPopup(`<b style="color:var(--accent)">${p.name}</b><br>${p.role.toUpperCase()}<br>Статус: <span style="color:${isSOS?'var(--red)':'var(--green)'}">${p.status.toUpperCase()}</span>`)
+        .addTo(soldiersLayer);
+
+      const div = document.createElement('div');
+      div.className = 'list-item ' + p.team;
+      div.innerHTML = `<span>${marker} ${p.name}</span><span class="status ${isSOS?'sos':''}">${p.status.toUpperCase()}</span>`;
+      listEl.appendChild(div);
+    });
+
+    document.getElementById('redCount').textContent = redC;
+    document.getElementById('blueCount').textContent = blueC;
+
+    if (!listEl.children.length) {
+      listEl.innerHTML = '<div style="color:var(--dim);font-size:11px">// Нет данных</div>';
     }
+  });
+}
 
-    function renderMap() {
-      const list = document.getElementById('entitiesList');
-      list.innerHTML = '';
+// ===== SOS =====
+function sendSOS() {
+  if (!confirm('// ОТПРАВИТЬ СИГНАЛ ТРЕВОГИ?')) return;
+  db.ref('players/' + me.id).update({ status: 'sos', updatedAt: Date.now() });
+  db.ref('events').push({ type: 'SOS', player: me.name, team: me.team, time: Date.now() });
+  const s = document.getElementById('sStatus');
+  if (s) { s.textContent = '🆘 ТРЕВОГА'; s.style.color = 'var(--red)'; }
+  alert('// SOS ОТПРАВЛЕН');
+}
 
-      if (myRole === 'soldier') {
-        for (const team in platoonsData) {
-          if (team === myTeam) {
-            for (const pId in platoonsData[team]) {
-              const cmd = platoonsData[team][pId];
-              list.innerHTML += `<div style="color:blue; font-weight:bold;">👑 ${cmd.name} (Взвод: ${pId})</div>`;
-            }
-          }
-        }
-      } else if (myRole === 'commander') {
-        for (const pId in playersData[myTeam] || {}) {
-          const player = playersData[myTeam][pId];
-          if (player.platoonId === myPlatoonId) {
-            list.innerHTML += `<div>👤 ${player.nick} (Солдат)</div>`;
-          }
-        }
-        for (const pId in platoonsData[myTeam] || {}) {
-          const cmd = platoonsData[myTeam][pId];
-          list.innerHTML += `<div style="color:blue; font-weight:bold;">👑 ${cmd.name} (Командир)</div>`;
-        }
-      }
-    }
+// ===== QR =====
+function showQR() {
+  const url = location.origin + location.pathname + '?squad=' + me.squad;
+  QRCode.toDataURL(url, { width: 300, margin: 1 }, (err, dataUrl) => {
+    if (err) return alert(err);
+    document.getElementById('qrImg').src = dataUrl;
+    document.getElementById('qrLink').textContent = url;
+    document.getElementById('qrModal').classList.remove('hidden');
+  });
+}
 
-    window.sendSOS = async function() {
-      await push(ref(db, 'logs'), {
-        timestamp: Date.now(), type: 'sos', message: `🚨 SOS от ${myName} (${myTeam})`
-      });
-      alert('SOS отправлен организаторам!');
-    };
+// ===== АВТОВХОД ПО URL =====
+const params = new URLSearchParams(location.search);
+if (params.get('squad')) document.getElementById('joinCode').value = params.get('squad');
 
-    window.logout = function() {
-      localStorage.clear();
-      window.location.reload();
-    };
-  </script>
+// ===== ВОССТАНОВЛЕНИЕ =====
+const saved = localStorage.getItem('me');
+if (saved) {
+  try { me = JSON.parse(saved); startSession(); } catch(e) {}
+}
+</script>
 </body>
 </html>
