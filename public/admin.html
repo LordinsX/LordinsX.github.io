@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SQUADRON // COMMAND CENTER</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#141812">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+:root{--bg:#0a0d08;--bg2:#141812;--bg3:#1e241a;--border:#2a3020;--accent:#d4a017;--green:#4ade80;--red:#ef4444;--blue:#60a5fa;--text:#c8d4c8;--dim:#5a6a5a;--mono:'Share Tech Mono',monospace;--sans:'Rajdhani',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 1px,transparent 1px,transparent 2px)}
+#authOverlay{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#authOverlay .box{background:var(--bg2);border:2px solid var(--accent);padding:40px;max-width:400px;width:90%;text-align:center}
+#authOverlay h2{color:var(--accent);letter-spacing:4px;font-size:22px;margin-bottom:4px}
+#authOverlay .sub{color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:2px;margin-bottom:24px}
+#authOverlay .error{color:var(--red);font-size:12px;margin-top:10px;min-height:16px;font-family:var(--mono)}
+#topBar{position:sticky;top:0;z-index:100;background:rgba(10,13,8,.96);border-bottom:2px solid var(--accent);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(8px)}
+.logo{font-weight:700;font-size:18px;color:var(--accent);letter-spacing:3px}
+.stats-bar{display:flex;gap:16px;font-family:var(--mono);font-size:11px;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;align-items:center}.stat-item .lbl{color:var(--dim);font-size:8px;letter-spacing:1px}.stat-item .val{color:var(--accent);font-weight:600;font-size:13px}
+.stat-item.red .val{color:var(--red)}.stat-item.blue .val{color:var(--blue)}.stat-item.green .val{color:var(--green)}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:2px solid var(--border);overflow-x:auto}
+.tab{padding:10px 18px;cursor:pointer;background:var(--bg2);color:var(--dim);border:1px solid var(--border);border-bottom:none;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+.tab:hover{color:var(--accent);border-color:var(--accent)}.tab.active{background:var(--bg3);color:var(--accent);border-color:var(--accent);border-bottom:2px solid var(--bg3);margin-bottom:-2px}
+.tab.danger{color:var(--red)}.tab-content{display:none;animation:fadeIn .3s}.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:900px){.grid-2,.grid-4{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);padding:16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
+.card.red::before{background:var(--red)}.card.blue::before{background:var(--blue)}
+.card-title{font-weight:700;font-size:14px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+input,select,button,textarea{width:100%;padding:9px 12px;margin:4px 0;background:var(--bg);color:var(--text);border:1px solid var(--border);font-family:var(--mono);font-size:12px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+button{background:var(--bg3);color:var(--accent);cursor:pointer;font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;border:2px solid var(--accent)}
+button:hover{background:var(--accent);color:var(--bg)}
+button.danger{color:var(--red);border-color:var(--red)}button.danger:hover{background:var(--red);color:#fff}
+button.success{color:var(--green);border-color:var(--green)}button.success:hover{background:var(--green);color:#000}
+button.warn{color:#fbbf24;border-color:#fbbf24}button.warn:hover{background:#fbbf24;color:#000}
+.form-row{display:flex;gap:8px}.form-row>*{flex:1}
+.item{background:var(--bg);border-left:3px solid var(--border);padding:10px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;transition:all .2s}
+.item:hover{background:var(--bg2)}.item.red{border-left-color:var(--red)}.item.blue{border-left-color:var(--blue)}
+.item .meta{color:var(--dim);font-size:10px;font-family:var(--mono);margin-top:2px}
+.item .actions{display:flex;gap:4px;flex-shrink:0}.item .actions button{width:auto;padding:4px 10px;margin:0;font-size:10px}
+.empty{color:var(--dim);font-size:11px;padding:16px;text-align:center;font-family:var(--mono)}
+.timer-display{font-size:52px;color:var(--accent);text-align:center;padding:24px;background:var(--bg);border:2px solid var(--accent);letter-spacing:6px;font-family:var(--mono);font-weight:700;margin:10px 0}
+.score-board{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.score-card{padding:24px;text-align:center;border:2px solid var(--border);background:var(--bg)}
+.score-card.red{border-color:var(--red)}.score-card.blue{border-color:var(--blue)}
+.score-card .value{font-size:44px;font-weight:700;font-family:var(--mono)}
+.score-card.red .value{color:var(--red)}.score-card.blue .value{color:var(--blue)}
+.score-card .label{font-size:11px;color:var(--dim);margin-top:4px;letter-spacing:2px;text-transform:uppercase}
+#fullLog,#dashLog{max-height:400px;overflow-y:auto;background:var(--bg);padding:10px;border:1px solid var(--border);font-size:11px;font-family:var(--mono)}
+.log-item{padding:4px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px}
+.log-time{color:var(--dim);min-width:80px}.log-type{min-width:120px;font-weight:600}
+.log-type.SOS{color:var(--red)}.log-type.ZONE_CAPTURED{color:var(--green)}.log-type.GAME_START{color:var(--accent)}.log-type.SOS_CANCELLED{color:var(--green)}
+.qr-box{background:#fff;padding:10px;margin-top:10px;display:inline-block;border:2px solid var(--accent)}.qr-box img{display:block;max-width:200px}
+#modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center}
+#modal.show{display:flex}#modal .box{background:var(--bg2);border:2px solid var(--accent);padding:28px;max-width:420px;width:90%}
+#modal h3{color:var(--accent);margin:0 0 12px;font-size:16px;letter-spacing:3px;text-transform:uppercase}
+#modal p{color:var(--text);font-size:13px;margin-bottom:14px}#modal .actions{display:flex;gap:8px;margin-top:16px}
+#toasts{position:fixed;bottom:20px;right:20px;z-index:3000;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--bg2);border-left:4px solid var(--accent);padding:10px 16px;font-size:12px;box-shadow:0 4px 20px rgba(0,0,0,.7);animation:slideIn .3s,fadeOut .5s 2.5s forwards;max-width:320px;border:1px solid var(--border);font-family:var(--mono)}
+.toast.success{border-left-color:var(--green)}.toast.error{border-left-color:var(--red)}
+@keyframes slideIn{from{transform:translateX(400px)}to{transform:translateX(0)}}@keyframes fadeOut{to{opacity:0;transform:translateX(400px)}}
+@keyframes sosPulseAdmin{0%,100%{background:rgba(239,68,68,.05)}50%{background:rgba(239,68,68,.15)}}
+@keyframes blink{50%{opacity:.3}}
+.dash-stat{text-align:center;padding:16px;background:var(--bg);border:1px solid var(--border)}
+.dash-stat .num{font-size:32px;font-weight:700;font-family:var(--mono);color:var(--accent)}
+.dash-stat .desc{font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.team-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:8px;display:flex}
+.team-bar .red-fill{background:var(--red);transition:width .5s}.team-bar .blue-fill{background:var(--blue);transition:width .5s}
+.hint{color:var(--dim);font-size:10px;font-style:italic;font-family:var(--mono);margin-top:6px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent)}
+</style>
+</head>
+<body>
+<div id="authOverlay"><div class="box"><h2>🛡️ SQUADRON</h2><div class="sub">COMMAND CENTER v5.0</div><input type="password" id="adminPass" placeholder="ПАРОЛЬ ОРГАНИЗАТОРА" autofocus><button onclick="adminLogin()">▸ ВОЙТИ</button><div class="error" id="authError"></div></div></div>
+<div id="topBar" style="display:none"><div class="logo">🛡️ COMMAND CENTER</div><div class="stats-bar"><div class="stat-item green"><span class="lbl">СТАТУС</span><span class="val" id="stStatus">ОЖИДАНИЕ</span></div><div class="stat-item"><span class="lbl">ИГРОКИ</span><span class="val" id="stPlayers">0</span></div><div class="stat-item"><span class="lbl">ВЗВОДЫ</span><span class="val" id="stSquads">0</span></div><div class="stat-item"><span class="lbl">ТОЧКИ</span><span class="val" id="stPois">0</span></div><div class="stat-item red"><span class="lbl">КРАСНЫЕ</span><span class="val" id="stRed">0</span></div><div class="stat-item blue"><span class="lbl">СИНИЕ</span><span class="val" id="stBlue">0</span></div><div class="stat-item"><span class="lbl">ВРЕМЯ</span><span class="val" id="stClock">--:--:--</span></div></div></div>
+<div class="container" id="mainContent" style="display:none">
+<div class="tabs">
+  <div class="tab active" onclick="sw('dash')">📊 ОБЗОР</div>
+  <div class="tab" onclick="sw('squads')">⚔ ВЗВОДЫ</div>
+  <div class="tab" onclick="sw('pois')">📍 ТОЧКИ</div>
+  <div class="tab" onclick="sw('players')">👥 ИГРОКИ</div>
+  <div class="tab" onclick="sw('game')">⏱ ИГРА</div>
+  <div class="tab" onclick="sw('log')">📜 ЖУРНАЛ</div>
+  <div class="tab danger" onclick="sw('danger')">⚠ УПРАВЛЕНИЕ</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dash">
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="dash-stat"><div class="num" id="dPlayers">0</div><div class="desc">Онлайн</div></div>
+    <div class="dash-stat"><div class="num" id="dSquads">0</div><div class="desc">Взводов</div></div>
+    <div class="dash-stat"><div class="num" id="dPois">0</div><div class="desc">Точек</div></div>
+    <div class="dash-stat"><div class="num" id="dEvents">0</div><div class="desc">Событий</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">БАЛАНС КОМАНД</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--red)">🔴 <b id="dRedCount">0</b></span><span style="color:var(--blue)">🔵 <b id="dBlueCount">0</b></span></div><div class="team-bar"><div class="red-fill" id="dRedBar" style="width:50%"></div><div class="blue-fill" id="dBlueBar" style="width:50%"></div></div><div style="margin-top:12px;font-size:11px;color:var(--dim)">СЧЁТ: <span style="color:var(--red)" id="dRedScore">0</span> — <span style="color:var(--blue)" id="dBlueScore">0</span></div></div>
+    <div class="card"><div class="card-title">СТАТУС ИГРЫ</div><div style="font-size:24px;text-align:center;color:var(--accent);font-family:var(--mono);padding:10px" id="dGameStatus">ОЖИДАНИЕ</div><div style="text-align:center;font-size:11px;color:var(--dim)">ТАЙМЕР: <span id="dTimer" style="color:var(--accent)">00:00</span></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-title">ПОСЛЕДНИЕ СОБЫТИЯ</div><div id="dashLog" style="max-height:150px"></div></div>
+</div>
+
+<!-- SQUADS -->
+<div class="tab-content" id="tab-squads"><div class="grid-2"><div class="card"><div class="card-title">СОЗДАТЬ ВЗВОД</div><div class="form-row"><input type="text" id="sqName" placeholder="НАЗВАНИЕ"><select id="sqTeam"><option value="red">🔴 КРАСНЫЕ</option><option value="blue">🔵 СИНИЕ</option></select></div><button onclick="createSquad()">▸ СОЗДАТЬ</button><div id="squadQR"></div></div><div class="card"><div class="card-title">ВЗВОДЫ (<span id="sqCount">0</span>)</div><div id="sqList"></div></div></div></div>
+
+<!-- POIS -->
+<div class="tab-content" id="tab-pois"><div class="grid-2"><div class="card"><div class="card-title">СОЗДАТЬ ТОЧКУ</div><input type="text" id="pName" placeholder="НАЗВАНИЕ"><div class="form-row"><select id="pType"><option value="flag">🚩 Флаг</option><option value="ammo">📦 Снабжение</option><option value="medic">🏥 Медпункт</option><option value="danger">⚠️ Опасная зона</option><option value="base">🏠 База</option></select><select id="pTeam"><option value="all">ВСЕ</option><option value="red">🔴 КРАСНЫЕ</option><option value="blue">🔵 СИНИЕ</option></select></div><div class="form-row"><input type="number" step="any" id="pLat" placeholder="ШИРОТА"><input type="number" step="any" id="pLng" placeholder="ДОЛГОТА"></div><input type="number" id="pRad" placeholder="РАДИУС (М)" value="50"><button onclick="createPOI()">▸ СОЗДАТЬ</button></div><div class="card"><div class="card-title">ТОЧКИ (<span id="pCount">0</span>)</div><div id="pList"></div></div></div></div>
+
+<!-- PLAYERS -->
+<div class="tab-content" id="tab-players"><div class="card"><div class="card-title">ИГРОКИ (<span id="plCount">0</span>)</div><input type="text" id="plSearch" placeholder="🔍 ПОИСК..." oninput="renderPlayers()"><div id="plList" style="margin-top:8px"></div></div></div>
+
+<!-- GAME -->
+<div class="tab-content" id="tab-game"><div class="grid-2"><div class="card"><div class="card-title">ТАЙМЕР</div><div class="timer-display" id="tmrDisplay">00:00</div><input type="number" id="tmrMin" value="30"><div class="form-row"><button class="success" onclick="socket.emit('game:start',+document.getElementById('tmrMin').value)">▶ СТАРТ</button><button class="danger" onclick="socket.emit('game:stop')">■ СТОП</button></div></div><div class="card"><div class="card-title">СЧЁТ</div><div class="score-board"><div class="score-card red"><div class="value" id="scRed">0</div><div class="label">🔴 КРАСНЫЕ</div></div><div class="score-card blue"><div class="value" id="scBlue">0</div><div class="label">🔵 СИНИЕ</div></div></div><button class="warn" onclick="confirmAction('Сбросить счёт?',()=>socket.emit('game:resetScores'))">↺ СБРОСИТЬ</button></div></div><div class="card" style="margin-top:16px"><div class="card-title">ВЕЩАНИЕ</div><select id="bcTarget"><option value="all">📢 ВСЕМ</option><option value="red">🔴 КРАСНЫМ</option><option value="blue">🔵 СИНИМ</option></select><textarea id="bcMsg" rows="2" placeholder="СООБЩЕНИЕ..."></textarea><button onclick="sendBC()">📡 ОТПРАВИТЬ</button></div></div>
+
+<!-- LOG -->
+<div class="tab-content" id="tab-log"><div class="card"><div class="card-title">ЖУРНАЛ</div><div class="form-row" style="margin-bottom:8px"><button onclick="exportCSV()">↓ CSV</button><button class="danger" onclick="confirmAction('Очистить?',()=>{state.events=[];renderLog();})">🗑 ОЧИСТИТЬ</button></div><div id="fullLog"></div></div></div>
+
+<!-- DANGER -->
+<div class="tab-content" id="tab-danger"><div class="card" style="border-color:var(--red)"><div class="card-title" style="color:var(--red)">⚠ ОПАСНАЯ ЗОНА</div><div class="hint" style="margin-bottom:12px">// Необратимые действия</div><div class="grid-2"><button class="danger" onclick="confirmAction('Удалить игроков?',()=>socket.emit('reset:players'))">🗑 ИГРОКИ</button><button class="danger" onclick="confirmAction('ПОЛНЫЙ СБРОС?',()=>socket.emit('reset:all'))">💥 СБРОСИТЬ ВСЁ</button></div></div><div class="card" style="margin-top:16px"><div class="card-title">🔐 ПАРОЛЬ (СЕССИЯ)</div><input type="password" id="newPass" placeholder="НОВЫЙ ПАРОЛЬ"><button onclick="changePass()">СОХРАНИТЬ</button></div></div>
+</div>
+
+<div id="modal"><div class="box"><h3>⚠ ПОДТВЕРЖДЕНИЕ</h3><p id="mText"></p><input type="text" id="mConfirm" placeholder="ВВЕДИТЕ ДА"><div class="actions"><button onclick="closeModal()">ОТМЕНА</button><button class="danger" onclick="execModal()">ВЫПОЛНИТЬ</button></div></div></div>
+<div id="toasts"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="config.js"></script>
+<script>
+const socket=io();
+let state={squads:{},players:{},pois:{},waypoints:{},game:{status:'waiting',scores:{red:0,blue:0}},events:[]};
+let mCb=null,tInt=null;
+setInterval(()=>{document.getElementById('stClock').textContent=new Date().toTimeString().slice(0,8);},1000);
+function toast(m,t=''){const b=document.getElementById('toasts'),d=document.createElement('div');d.className='toast '+t;d.textContent=m;b.appendChild(d);setTimeout(()=>d.remove(),3000);}
+function adminLogin(){fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('adminPass').value})}).then(r=>r.json()).then(d=>{if(d.success){sessionStorage.setItem('adm','1');showMain();}else document.getElementById('authError').textContent='⚠ НЕВЕРНЫЙ ПАРОЛЬ';});}
+document.getElementById('adminPass').addEventListener('keypress',e=>{if(e.key==='Enter')adminLogin();});
+function showMain(){document.getElementById('authOverlay').style.display='none';document.getElementById('topBar').style.display='flex';document.getElementById('mainContent').style.display='block';}
+if(sessionStorage.getItem('adm')==='1')showMain();
+function sw(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));event.target.classList.add('active');document.getElementById('tab-'+id).classList.add('active');}
+function createSquad(){const n=document.getElementById('sqName').value.trim();if(!n)return toast('Название?','error');socket.emit('squad:create',{name:n,team:document.getElementById('sqTeam').value});document.getElementById('sqName').value='';}
+function createPOI(){const n=document.getElementById('pName').value.trim(),lat=parseFloat(document.getElementById('pLat').value),lng=parseFloat(document.getElementById('pLng').value);if(!n||isNaN(lat)||isNaN(lng))return toast('Заполните поля','error');socket.emit('poi:create',{name:n,lat,lng,type:document.getElementById('pType').value,team:document.getElementById('pTeam').value,radius:parseInt(document.getElementById('pRad').value)||0});['pName','pLat','pLng'].forEach(i=>document.getElementById(i).value='');toast('Создано','success');}
+function sendBC(){const m=document.getElementById('bcMsg').value.trim();if(!m)return toast('Сообщение?','error');socket.emit('broadcast:send',{target:document.getElementById('bcTarget').value,message:m});document.getElementById('bcMsg').value='';toast('Отправлено','success');}
+function changePass(){const p=document.getElementById('newPass').value.trim();if(!p)return toast('Пароль?','error');window.ADMIN_PASS=p;sessionStorage.setItem('apOvr',p);document.getElementById('newPass').value='';toast('Сохранено','success');}
+function confirmAction(t,cb){document.getElementById('mText').textContent=t;document.getElementById('mConfirm').value='';mCb=cb;document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');mCb=null;}
+function execModal(){if(document.getElementById('mConfirm').value.trim().toUpperCase()==='ДА'){if(mCb)mCb();toast('Выполнено','success');}else toast('Не подтверждено','error');closeModal();}
+function exportCSV(){const rows=[['Время','Тип','Данные']];state.events.forEach(e=>{rows.push([new Date(e.time).toLocaleString('ru-RU'),e.type||'',Object.entries(e).filter(([k])=>k!=='time').map(([k,v])=>`${k}=${v}`).join('; ')]);});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv;charset=utf-8'}));a.download='events-'+Date.now()+'.csv';a.click();}
+
+function updateDashboard(){
+  const pl=Object.keys(state.players).length,sq=Object.keys(state.squads).length,po=Object.keys(state.pois).length,ev=state.events.length;
+  const rc=Object.values(state.players).filter(p=>p.team==='red').length,bc=Object.values(state.players).filter(p=>p.team==='blue').length,total=rc+bc||1;
+  document.getElementById('dPlayers').textContent=pl;document.getElementById('dSquads').textContent=sq;document.getElementById('dPois').textContent=po;document.getElementById('dEvents').textContent=ev;
+  document.getElementById('dRedCount').textContent=rc;document.getElementById('dBlueCount').textContent=bc;
+  document.getElementById('dRedBar').style.width=(rc/total*100)+'%';document.getElementById('dBlueBar').style.width=(bc/total*100)+'%';
+  document.getElementById('dRedScore').textContent=state.game.scores.red||0;document.getElementById('dBlueScore').textContent=state.game.scores.blue||0;
+  const gs={waiting:'ОЖИДАНИЕ',running:'🟢 ИГРА',paused:'⏸ ПАУЗА',ended:'🔴 ФИНИШ'};
+  document.getElementById('dGameStatus').textContent=gs[state.game.status]||state.game.status;
+  document.getElementById('dGameStatus').style.color=state.game.status==='running'?'var(--green)':(state.game.status==='ended'?'var(--red)':'var(--accent)');
+}
+
+function renderSquads(){const el=document.getElementById('sqList');el.innerHTML='';const list=Object.entries(state.squads);document.getElementById('sqCount').textContent=list.length;if(!list.length){el.innerHTML='<div class="empty">// Нет взводов</div>';return;}list.forEach(([id,s])=>{el.innerHTML+=`<div class="item ${s.team}"><div><b>${s.team==='red'?'🔴':'🔵'} ${s.name}</b><div class="meta">ID: ${id}</div></div><div class="actions"><button onclick="navigator.clipboard.writeText(location.origin+'?squad='+id).then(()=>toast('Скопировано','success'))">🔗</button><button class="danger" onclick="socket.emit('squad:delete','${id}')">🗑</button></div></div>`;});}
+
+function renderPOIs(){const el=document.getElementById('pList');el.innerHTML='';const list=Object.entries(state.pois);document.getElementById('pCount').textContent=list.length;if(!list.length){el.innerHTML='<div class="empty">// Нет точек</div>';return;}const icons={flag:'🚩',ammo:'📦',medic:'🏥',danger:'⚠️',base:'🏠'};list.forEach(([id,p])=>{const owner=p.capturedBy?` · 🏳 ${p.capturedBy.toUpperCase()}`:'';el.innerHTML+=`<div class="item ${p.team==='all'?'':p.team}"><div><b>${icons[p.type]||'📍'} ${p.name}</b><div class="meta">${p.type} · ${p.team} · R:${p.radius||0}м${owner}</div></div><div class="actions">${p.radius?`<button onclick="socket.emit('zone:reset','${id}')">↺</button>`:''}<button class="danger" onclick="socket.emit('poi:delete','${id}')">🗑</button></div></div>`;});}
+
+// === RENDER PLAYERS WITH SOS HIGHLIGHT ===
+function renderPlayers(){
+  const el=document.getElementById('plList');el.innerHTML='';
+  const search=(document.getElementById('plSearch')?.value||'').toLowerCase();
+  let list=Object.entries(state.players);
+  if(search)list=list.filter(([,p])=>p.name.toLowerCase().includes(search));
+  document.getElementById('plCount').textContent=Object.keys(state.players).length;
+  if(!list.length){el.innerHTML='<div class="empty">// Нет игроков</div>';return;}
+  // SOS наверх
+  list.sort((a,b)=>(a[1].status==='sos'?-1:b[1].status==='sos'?1:0));
+  list.forEach(([id,p])=>{
+    const isSOS=p.status==='sos';
+    const sosStyle=isSOS?'border-left-color:var(--red);background:rgba(239,68,68,0.1);animation:sosPulseAdmin 1s infinite;':'';
+    const badge=isSOS?'<span style="color:var(--red);font-weight:bold;animation:blink .8s infinite;">🆘 SOS</span>':`<span style="color:var(--green)">${p.status}</span>`;
+    el.innerHTML+=`<div class="item ${p.team}" style="${sosStyle}"><div><b>${p.role==='commander'?'👑':'🎖️'} ${p.name}</b> ${badge}<div class="meta">${p.team.toUpperCase()} · ${p.squad}${p.lat?' · '+p.lat.toFixed(4)+','+p.lng.toFixed(4):''}</div></div><div class="actions">${isSOS?`<button class="success" onclick="socket.emit('player:unsos','${id}')">✓ СНЯТЬ</button>`:''}<button class="danger" onclick="socket.emit('player:kick','${id}')">🗑</button></div></div>`;
+  });
+}
+
+function renderLog(targetId,max){const el=document.getElementById(targetId);el.innerHTML='';const items=state.events.slice().reverse().slice(0,max||999);if(!items.length){el.innerHTML='<div class="empty">// Нет событий</div>';return;}items.forEach(e=>{el.innerHTML+=`<div class="log-item"><span class="log-time">${new Date(e.time).toLocaleTimeString('ru-RU')}</span><span class="log-type ${e.type}">${e.type}</span><span style="color:var(--text)">${Object.entries(e).filter(([k])=>!['time','type'].includes(k)).map(([k,v])=>`${k}=${v}`).join(' · ')}</span></div>`;});}
+
+function updateTimer(){if(tInt)clearInterval(tInt);const t=state.game.timer;if(!t){document.getElementById('tmrDisplay').textContent='00:00';document.getElementById('dTimer').textContent='00:00';return;}const upd=()=>{let ms=t.mode==='countdown'?Math.max(0,t.endTime-Date.now()):Date.now()-t.startTime;const s=`${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;document.getElementById('tmrDisplay').textContent=s;document.getElementById('dTimer').textContent=s;};upd();tInt=setInterval(upd,1000);}
+
+socket.on('init',d=>{state=d;renderAll();});
+socket.on('squads:update',d=>{state.squads=d;renderSquads();updateDashboard();});
+socket.on('pois:update',d=>{state.pois=d;renderPOIs();updateDashboard();});
+socket.on('players:update',d=>{state.players=d;renderPlayers();updateDashboard();});
+socket.on('events:update',d=>{state.events=d;renderLog('fullLog');renderLog('dashLog',10);updateDashboard();});
+socket.on('scores:update',d=>{state.game.scores=d;document.getElementById('scRed').textContent=d.red||0;document.getElementById('scBlue').textContent=d.blue||0;updateDashboard();});
+socket.on('game:update',d=>{state.game=d;updateTimer();updateDashboard();});
+socket.on('squad:created',({id})=>{fetch('/api/qr?url='+encodeURIComponent(location.origin+'?squad='+id)).then(r=>r.json()).then(d=>{document.getElementById('squadQR').innerHTML=`<div class="qr-box"><img src="${d.dataUrl}"></div>`;});toast('Взвод: '+id,'success');});
+
+function renderAll(){renderSquads();renderPOIs();renderPlayers();renderLog('fullLog');renderLog('dashLog',10);document.getElementById('scRed').textContent=state.game.scores.red||0;document.getElementById('scBlue').textContent=state.game.scores.blue||0;updateTimer();updateDashboard();document.getElementById('stPlayers').textContent=Object.keys(state.players).length;document.getElementById('stSquads').textContent=Object.keys(state.squads).length;document.getElementById('stPois').textContent=Object.keys(state.pois).length;document.getElementById('stRed').textContent=state.game.scores.red||0;document.getElementById('stBlue').textContent=state.game.scores.blue||0;const gs={waiting:'ОЖИДАНИЕ',running:'ИГРА',paused:'ПАУЗА',ended:'ФИНИШ'};document.getElementById('stStatus').textContent=gs[state.game.status]||state.game.status;}
+</script>
+</body>
+</html>

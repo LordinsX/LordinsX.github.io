@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SQUADRON</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#141812">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+:root{--bg:#0a0d08;--bg2:#141812;--bg3:#1e241a;--border:#2a3020;--accent:#d4a017;--green:#4ade80;--red:#ef4444;--blue:#60a5fa;--text:#c8d4c8;--dim:#5a6a5a;--mono:'Share Tech Mono',monospace;--sans:'Rajdhani',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0,rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px)}
+#splash{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+#splash h1{font-size:28px;color:var(--accent);letter-spacing:4px;font-weight:700}
+#splashBarWrap{margin-top:16px;width:120px;height:2px;background:var(--border);overflow:hidden}
+#splashBar{width:0%;height:100%;background:var(--accent);transition:width .3s}
+#splashSub{margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px}
+#map{position:absolute;inset:0;z-index:1;filter:saturate(.2) brightness(.6) contrast(1.2) sepia(.3)}
+.leaflet-container{background:#000!important;font-family:var(--mono)}
+.leaflet-popup-content-wrapper{background:rgba(10,13,8,.95);color:var(--text);border:1px solid var(--accent);border-radius:0}
+#hud{position:absolute;top:0;left:0;right:0;z-index:1000;background:rgba(10,13,8,.92);border-bottom:2px solid var(--accent);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(6px)}
+.hud-logo{font-weight:700;font-size:16px;color:var(--accent);letter-spacing:2px}
+.hud-stats{display:flex;gap:12px;font-family:var(--mono);font-size:11px}
+.hud-stat b{color:var(--accent);font-size:13px}.hud-stat.red b{color:var(--red)}.hud-stat.blue b{color:var(--blue)}
+.panel{position:absolute;top:52px;left:10px;z-index:1000;width:340px;max-height:calc(100vh - 62px);background:rgba(10,13,8,.96);border:2px solid var(--accent);overflow-y:auto;backdrop-filter:blur(8px)}
+.panel-header{padding:10px 14px;background:var(--bg3);border-bottom:2px solid var(--accent);display:flex;justify-content:space-between}
+.panel-title{font-weight:700;font-size:14px;color:var(--accent);letter-spacing:2px}
+.panel-close{background:var(--bg);border:1px solid var(--border);color:var(--dim);width:26px;height:26px;cursor:pointer}
+.panel-body{padding:12px}
+.section{background:var(--bg2);border:1px solid var(--border);margin-bottom:10px}
+.section-header{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.section-header::before{content:'▸';color:var(--accent)}
+.section-title{font-weight:600;font-size:12px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.section-body{padding:10px 12px}
+input,select,button{width:100%;padding:9px 12px;margin:4px 0;background:var(--bg);color:var(--text);border:1px solid var(--border);font-family:var(--mono);font-size:12px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+button{background:var(--bg3);color:var(--accent);cursor:pointer;font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;border:2px solid var(--accent)}
+button:hover{background:var(--accent);color:var(--bg)}
+button.danger{color:var(--red);border-color:var(--red)}button.danger:hover{background:var(--red);color:#fff}
+button.warn{color:#fbbf24;border-color:#fbbf24}button.warn:hover{background:#fbbf24;color:#000}
+button.success{color:var(--green);border-color:var(--green)}button.success:hover{background:var(--green);color:#000}
+.hidden{display:none!important}
+.grid-label{background:none!important;border:none!important;font-family:var(--mono);font-weight:bold;text-shadow:0 0 3px #000}
+.soldier-label{display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.soldier-info{background:rgba(0,0,0,.85);border:1px solid var(--accent);padding:2px 6px;margin-bottom:3px;text-align:center;position:relative}
+.soldier-info::after{content:'';position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);border-left:3px solid transparent;border-right:3px solid transparent;border-top:3px solid var(--accent)}
+.soldier-info .sq{font-size:8px;color:var(--accent);display:block}.soldier-info .nm{font-size:11px;font-weight:bold;display:block;white-space:nowrap}
+.soldier-info.red .nm{color:#fca5a5}.soldier-info.blue .nm{color:#93c5fd}
+.soldier-info.me{border-color:var(--green)}.soldier-info.me::after{border-top-color:var(--green)}
+.soldier-info.sos{border-color:var(--red);animation:sosLbl .8s infinite}.soldier-info.sos::after{border-top-color:var(--red)}
+@keyframes sosLbl{0%,100%{background:rgba(239,68,68,.15)}50%{background:rgba(239,68,68,.35)}}
+.marker-circle{width:32px;height:32px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+.marker-circle.red{background:var(--red)}.marker-circle.blue{background:var(--blue)}
+.marker-circle.sos{background:#fff;color:var(--red);animation:pulse .6s infinite}.marker-circle.me{border-color:var(--green)}
+@keyframes pulse{50%{transform:scale(1.15);box-shadow:0 0 15px var(--red)}}
+.wp-marker{width:36px;height:36px;background:rgba(0,0,0,.85);border:2px solid var(--accent);transform:rotate(45deg);display:flex;align-items:center;justify-content:center}
+.wp-marker span{transform:rotate(-45deg);font-size:18px}
+.wp-marker.enemy{border-color:var(--red)}.wp-marker.move{border-color:var(--green)}
+.wp-name{position:absolute;top:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(0,0,0,.85);border:1px solid var(--accent);padding:1px 6px;font-size:9px;color:var(--accent);font-family:var(--mono)}
+#ctxMenu{position:fixed;z-index:3000;background:rgba(10,13,8,.96);border:2px solid var(--accent);display:none;flex-direction:column;min-width:180px}
+#ctxMenu.show{display:flex}#ctxMenu input{border-bottom:2px solid var(--accent);margin:0 0 4px}
+#ctxMenu button{border:none;border-bottom:1px solid var(--border);margin:0;text-align:left;padding:10px 12px}
+#notifications{position:fixed;top:56px;right:10px;z-index:2000;width:300px;pointer-events:none;display:flex;flex-direction:column;gap:8px}
+.notif{background:rgba(10,13,8,.95);border-left:3px solid var(--accent);padding:10px 14px;font-size:12px;animation:slideIn .3s,fadeOut .5s 4.5s forwards;pointer-events:auto;border:1px solid var(--border)}
+.notif.capture{border-left-color:var(--green)}.notif.sos{border-left-color:var(--red)}
+.notif .ntitle{font-weight:700;margin-bottom:4px;font-size:11px;color:var(--accent)}
+@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{to{opacity:0;transform:translateX(400px)}}
+.list-item{background:var(--bg);border-left:3px solid var(--border);padding:8px 10px;margin:4px 0;font-size:11px;display:flex;justify-content:space-between}
+.list-item.red{border-left-color:var(--red)}.list-item.blue{border-left-color:var(--blue)}
+.hint{color:var(--dim);font-size:10px;font-style:italic;font-family:var(--mono);margin-top:6px}
+
+/* DRAW TOOLS */
+#map.drawing-mode{cursor:crosshair!important}
+.leaflet-container.drawing-mode{cursor:crosshair!important}
+#drawTools{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:1500;display:none;gap:6px;background:rgba(10,13,8,.95);border:2px solid var(--accent);padding:8px;backdrop-filter:blur(8px)}
+#drawTools.show{display:flex}
+#drawTools button{width:auto;padding:8px 14px;margin:0;font-size:11px;white-space:nowrap}
+#drawTools .active{background:var(--accent);color:var(--bg)}
+
+@media(max-width:600px){.panel{width:calc(100% - 20px)}.hud-stats{gap:8px;font-size:10px}}
+</style>
+</head>
+<body>
+<div id="splash"><h1>SQUADRON</h1><div id="splashBarWrap"><div id="splashBar"></div></div><div id="splashSub">INITIALIZING TACTICAL NETWORK...</div></div>
+<div id="map"></div>
+<div id="hud">
+  <div class="hud-logo">⚔ SQUADRON</div>
+  <div class="hud-stats">
+    <div class="hud-stat"><span style="font-size:8px;color:var(--dim)">СЕКТОР</span><br><b id="sectorStat">--</b></div>
+    <div class="hud-stat"><span style="font-size:8px;color:var(--dim)">ТАЙМЕР</span><br><b id="timerStat">00:00</b></div>
+    <div class="hud-stat red"><span style="font-size:8px;color:var(--dim)">КРАСНЫЕ</span><br><b id="redStat">0/0</b></div>
+    <div class="hud-stat blue"><span style="font-size:8px;color:var(--dim)">СИНИЕ</span><br><b id="blueStat">0/0</b></div>
+  </div>
+</div>
+<div id="notifications"></div>
+<div id="ctxMenu">
+  <input type="text" id="wpNameInput" placeholder="НАЗВАНИЕ ТОЧКИ" maxlength="20">
+  <button onclick="placeWP('enemy')">🎯 Противник</button>
+  <button onclick="placeWP('target')">📍 Цель</button>
+  <button onclick="placeWP('attention')">⚠️ Внимание</button>
+  <button onclick="placeWP('move')">➡️ Движение</button>
+  <button class="danger" onclick="closeCtx()">✕ Отмена</button>
+</div>
+
+<!-- ПАНЕЛЬ ИНСТРУМЕНТОВ РИСОВАНИЯ -->
+<div id="drawTools">
+  <button id="btnDrawAttack" onclick="setDrawMode('attack')">⚔️ АТАКА</button>
+  <button id="btnDrawMove" onclick="setDrawMode('move')">➡️ ДВИЖЕНИЕ</button>
+  <button id="btnDrawDefend" onclick="setDrawMode('defend')">🛡️ ОБОРОНА</button>
+  <button class="danger" onclick="clearMyVectors()">🗑 ОЧИСТИТЬ</button>
+  <button class="warn" onclick="stopDrawing()">✕ ЗАКРЫТЬ</button>
+</div>
+
+<div class="panel" id="mainPanel">
+  <div class="panel-header"><div class="panel-title">ОПЕРАТОР</div><button class="panel-close" onclick="document.getElementById('mainPanel').classList.add('hidden')">_</button></div>
+  <div class="panel-body">
+    <div id="loginView">
+      <div class="section"><div class="section-header"><div class="section-title">QR / КОД</div></div><div class="section-body"><input type="text" id="joinCode" placeholder="КОД ВЗВОДА"><button onclick="joinByCode()">▸ ВСТУПИТЬ</button></div></div>
+      <div class="section"><div class="section-header"><div class="section-title">СОЛДАТ</div></div><div class="section-body"><input type="text" id="sName" placeholder="ПОЗЫВНОЙ"><select id="sTeam"></select><button onclick="loginSoldier()">▸ ВОЙТИ</button></div></div>
+      <div class="section"><div class="section-header"><div class="section-title">КОМАНДИР</div></div><div class="section-body"><input type="text" id="cSquad" placeholder="ID ВЗВОДА"><select id="cTeam"></select><button onclick="loginCmd()">▸ ВОЙТИ</button></div></div>
+      
+      <!-- РЕЖИМ ТРЕЙЛЕРА -->
+      <div class="section" style="border-color:var(--accent2); margin-top:10px;">
+        <div class="section-header"><div class="section-title">🎬 РЕЖИМ ТРЕЙЛЕРА</div></div>
+        <div class="section-body">
+          <div class="form-row">
+            <input type="number" id="botCount" value="20" min="1" max="100" placeholder="Кол-во">
+            <button class="success" onclick="startBots()">▶ ЗАПУСТИТЬ БОТОВ</button>
+          </div>
+          <button class="danger" onclick="stopBots()" style="margin-top:4px">■ ОСТАНОВИТЬ И УДАЛИТЬ</button>
+          <div class="hint">// Боты берут реальные взводы и роятся вокруг вас.</div>
+        </div>
+      </div>
+
+      <div class="section" style="border-color:var(--accent)"><div class="section-header"><div class="section-title">📱 СТАБИЛЬНАЯ РАБОТА</div></div><div class="section-body hint">1. Установите приложение<br>2. Геолокация «Всегда»<br>3. Отключите экономию батареи</div></div>
+      <div id="installContainer"></div>
+    </div>
+    <div id="gameView" class="hidden">
+      <div class="section"><div class="section-header"><div class="section-title">СТАТУС</div></div><div class="section-body" style="font-size:12px;line-height:1.8">
+        <div><span style="color:var(--accent)">ПОЗЫВНОЙ:</span> <b id="myName"></b></div>
+        <div><span style="color:var(--accent)">ВЗВОД:</span> <b id="mySquad"></b></div>
+        <div><span style="color:var(--accent)">РОЛЬ:</span> <b id="myRole"></b></div>
+        <div><span style="color:var(--accent)">СТАТУС:</span> <span id="myStatus" style="color:var(--green)">В СТРОЮ</span></div>
+      </div></div>
+      
+      <!-- КНОПКА ПЛАНИРОВАНИЯ (ТОЛЬКО КОМАНДИР) -->
+      <button id="btnPlan" class="success" onclick="toggleDrawTools()" style="display:none">🗺️ ПЛАНИРОВАНИЕ АТАКИ</button>
+      
+      <button id="btnSOS" class="warn" onclick="toggleSOS()">🆘 SOS — ТРЕВОГА</button>
+      <button class="danger" onclick="logout()">✕ ОТКЛЮЧИТЬСЯ</button>
+      <div class="section" style="margin-top:10px"><div class="section-header"><div class="section-title">ОБЪЕКТЫ И СОЮЗНИКИ</div></div><div class="section-body" id="objList" style="max-height:200px;overflow-y:auto"></div></div>
+    </div>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="config.js"></script>
+<script>
+const C=CONFIG,T=C.texts;
+['sTeam','cTeam'].forEach(id=>{const s=document.getElementById(id);Object.entries(T.teams).forEach(([k,v])=>{s.innerHTML+=`<option value="${k}">${v.emoji} ${v.name}</option>`;});});
+
+// PWA
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+let wakeLock=null;
+async function requestWakeLock(){try{if('wakeLock'in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}}
+document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'){await requestWakeLock();if(me&&watchId){navigator.geolocation.clearWatch(watchId);startGeolocation();}}});
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.createElement('button');b.textContent='📲 УСТАНОВИТЬ';b.className='success';b.style.marginTop='10px';b.onclick=async()=>{deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;if(outcome==='accepted')b.remove();deferredPrompt=null;};document.getElementById('installContainer').appendChild(b);});
+
+const socket=io();
+let me=null,myCoords=null,watchId=null,timerInt=null;
+let state={players:{},pois:{},waypoints:{},vectors:{},squads:{},game:{scores:{red:0,blue:0},status:'waiting'}};
+let pendingWPCoords=null;
+
+const map=L.map('map',{zoomSnap:.5,minZoom:C.map.minZoom}).setView(C.map.startCenter,C.map.startZoom);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:C.map.maxZoom}).addTo(map);
+const layers={soldiers:L.layerGroup().addTo(map),pois:L.layerGroup().addTo(map),wps:L.layerGroup().addTo(map),vectors:L.layerGroup().addTo(map)};
+
+// Grid
+(function(){const[[s,w],[n,e]]=C.map.bounds;const dLat=(n-s)/C.map.gridRows,dLng=(e-w)/C.map.gridCols;
+L.rectangle(C.map.bounds,{color:C.map.borderColor,weight:3,fill:false,dashArray:'10,5'}).addTo(map);
+for(let i=0;i<=C.map.gridRows;i++){let lat=s+i*dLat;L.polyline([[lat,w],[lat,e]],{color:C.map.gridColor,opacity:C.map.gridOpacity,dashArray:'4,4'}).addTo(map);if(i<C.map.gridRows)L.marker([lat+dLat/2,e],{icon:L.divIcon({html:`<div style="color:${C.map.gridColor};font-size:14px">${C.map.gridRows-i}</div>`,className:'grid-label',iconAnchor:[-5,10]}),interactive:false}).addTo(map);}
+for(let j=0;j<=C.map.gridCols;j++){let lng=w+j*dLng;L.polyline([[s,lng],[n,lng]],{color:C.map.gridColor,opacity:C.map.gridOpacity,dashArray:'4,4'}).addTo(map);if(j<C.map.gridCols)L.marker([n,lng+dLng/2],{icon:L.divIcon({html:`<div style="color:${C.map.gridColor};font-size:14px">${C.map.gridLetters[j]}</div>`,className:'grid-label',iconAnchor:[10,-5]}),interactive:false}).addTo(map);}})();
+
+function getSector(lat,lng){const[[s,w],[n,e]]=C.map.bounds;if(lat<s||lat>n||lng<w||lng>e)return'ВНЕ ЗОНЫ';return`${C.map.gridLetters[Math.floor((lng-w)/((e-w)/C.map.gridCols))]}${C.map.gridRows-Math.floor((n-lat)/((n-s)/C.map.gridRows))}`;}
+
+// GPS Worker
+const gwCode=`let w=null;self.onmessage=function(e){if(e.data.cmd==='start')w=navigator.geolocation.watchPosition(p=>self.postMessage({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:10000});else if(e.data.cmd==='stop'&&w)navigator.geolocation.clearWatch(w);};`;
+let gpsW=null;try{gpsW=new Worker(URL.createObjectURL(new Blob([gwCode],{type:'application/javascript'})));gpsW.onmessage=e=>{if(e.data.lat&&me){myCoords={lat:e.data.lat,lng:e.data.lng};socket.emit('player:update',{id:me.id,lat:e.data.lat,lng:e.data.lng});document.getElementById('sectorStat').textContent=getSector(e.data.lat,e.data.lng);checkZoneCapture();}};}catch(e){}
+
+function startGeolocation(){requestWakeLock();if(gpsW)gpsW.postMessage({cmd:'start'});if(!navigator.geolocation)return;watchId=navigator.geolocation.watchPosition(pos=>{const{latitude:lat,longitude:lng}=pos.coords;myCoords={lat,lng};socket.emit('player:update',{id:me.id,lat,lng});document.getElementById('sectorStat').textContent=getSector(lat,lng);checkZoneCapture();if(navigator.vibrate)navigator.vibrate(5);},()=>{},{enableHighAccuracy:true,maximumAge:C.game.geoAccuracyMaxAge});}
+
+async function loginSoldier(){const n=document.getElementById('sName').value.trim();if(!n)return alert('Позывной?');me={id:'s_'+Date.now(),name:n,team:document.getElementById('sTeam').value,squad:'free',role:'soldier'};await resolveSquad();startSession();}
+async function loginCmd(){const s=document.getElementById('cSquad').value.trim();if(!s)return alert('ID взвода?');me={id:'c_'+s,name:'Командир',team:document.getElementById('cTeam').value,squad:s,role:'commander'};await resolveSquad();startSession();}
+async function joinByCode(){const code=document.getElementById('joinCode').value.trim();if(!code)return alert('Код?');const sq=state.squads[code];if(!sq)return alert('Не найден');const n=prompt('Позывной:');if(!n)return;me={id:'s_'+Date.now(),name:n,team:sq.team,squad:code,role:'soldier'};await resolveSquad();startSession();}
+async function resolveSquad(){me.squadName=me.squad;if(me.squad!=='free'&&state.squads[me.squad])me.squadName=state.squads[me.squad].name||me.squad;}
+
+function startSession(){localStorage.setItem('me',JSON.stringify(me));document.getElementById('loginView').classList.add('hidden');document.getElementById('gameView').classList.remove('hidden');document.getElementById('myName').textContent=me.name;document.getElementById('mySquad').textContent=me.squadName+(me.role==='commander'?' ['+me.squad+']':'');document.getElementById('myRole').textContent=me.role==='commander'?'КОМАНДИР':'СОЛДАТ';
+if(me.role==='commander')document.getElementById('btnPlan').style.display='block';
+socket.emit('player:join',me);startGeolocation();}
+function logout(){if(!confirm('Выйти?'))return;socket.emit('player:leave',me.id);if(watchId)navigator.geolocation.clearWatch(watchId);if(gpsW)gpsW.postMessage({cmd:'stop'});localStorage.removeItem('me');location.reload();}
+
+// === SOS TOGGLE ===
+function toggleSOS(){
+  const st=document.getElementById('myStatus');const btn=document.getElementById('btnSOS');const isSOS=st.textContent.includes('ТРЕВОГА');
+  if(isSOS){if(!confirm('// ОТМЕНИТЬ ТРЕВОГУ?'))return;socket.emit('player:unsos',me.id);st.textContent='В СТРОЮ';st.style.color='var(--green)';btn.textContent='🆘 SOS — ТРЕВОГА';btn.className='warn';}
+  else{if(!confirm('// ОТПРАВИТЬ SOS?'))return;socket.emit('player:sos',{id:me.id,name:me.name,team:me.team});st.textContent='🆘 ТРЕВОГА';st.style.color='var(--red)';btn.textContent='✕ ОТМЕНИТЬ SOS';btn.className='danger';if(navigator.vibrate)navigator.vibrate([100,50,100]);}
+}
+
+// === ATTACK VECTOR DRAWING SYSTEM ===
+let drawMode=null,drawStartPoint=null,tempLine=null,isDrawing=false;
+const VECTOR_COLORS={attack:'#ef4444',move:'#4ade80',defend:'#60a5fa'};
+const VECTOR_LABELS={attack:'АТАКА',move:'ДВИЖЕНИЕ',defend:'ОБОРОНА'};
+
+function toggleDrawTools(){const t=document.getElementById('drawTools');t.classList.toggle('show');if(!t.classList.contains('show'))stopDrawing();}
+function setDrawMode(mode){document.querySelectorAll('#drawTools button').forEach(b=>b.classList.remove('active'));if(drawMode===mode){stopDrawing();return;}drawMode=mode;document.getElementById('btnDraw'+mode.charAt(0).toUpperCase()+mode.slice(1)).classList.add('active');document.getElementById('map').classList.add('drawing-mode');notify('🗺️ РИСОВАНИЕ',`Кликните начало и конец для "${VECTOR_LABELS[mode]}"`,'');}
+function stopDrawing(){drawMode=null;drawStartPoint=null;isDrawing=false;if(tempLine){map.removeLayer(tempLine);tempLine=null;}document.getElementById('map').classList.remove('drawing-mode');document.querySelectorAll('#drawTools button').forEach(b=>b.classList.remove('active'));}
+function clearMyVectors(){if(!confirm('Удалить все ваши векторы?'))return;socket.emit('vector:clearSquad',me.squad);toast('Векторы очищены','success');}
+
+map.on('click',e=>{
+  if(!drawMode||!me||me.role!=='commander')return;
+  if(!isDrawing){drawStartPoint=e.latlng;isDrawing=true;tempLine=L.polyline([e.latlng,e.latlng],{color:VECTOR_COLORS[drawMode],weight:4,opacity:0.7,dashArray:'10,6'}).addTo(map);}
+  else{socket.emit('vector:create',{startLat:drawStartPoint.lat,startLng:drawStartPoint.lng,endLat:e.latlng.lat,endLng:e.latlng.lng,type:drawMode,squad:me.squad,team:me.team,createdBy:me.name});if(tempLine){map.removeLayer(tempLine);tempLine=null;}drawStartPoint=null;isDrawing=false;notify('✅ ВЕКТОР СОЗДAN',VECTOR_LABELS[drawMode],'broadcast');}
+});
+map.on('mousemove',e=>{if(isDrawing&&tempLine&&drawStartPoint)tempLine.setLatLngs([drawStartPoint,e.latlng]);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')stopDrawing();});
+
+function renderVectors(){
+  layers.vectors.clearLayers();const now=Date.now();
+  Object.values(state.vectors||{}).forEach(v=>{
+    if(v.expiresAt&&v.expiresAt<now)return;if(v.squad!==me?.squad&&v.team!==me?.team)return;
+    const color=VECTOR_COLORS[v.type]||'#d4a017';const label=VECTOR_LABELS[v.type]||v.type.toUpperCase();
+    const polyline=L.polyline([[v.startLat,v.startLng],[v.endLat,v.endLng]],{color:color,weight:5,opacity:0.8,dashArray:v.type==='defend'?'2,8':(v.type==='move'?'12,8':null),lineCap:'round',lineJoin:'round'}).addTo(layers.vectors);
+    const angle=Math.atan2(v.endLng-v.startLng,v.endLat-v.startLat)*180/Math.PI;
+    const arrowIcon=L.divIcon({html:`<div style="transform:rotate(${angle-90}deg);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:20px solid ${color};filter:drop-shadow(0 0 4px ${color});"></div>`,className:'',iconSize:[20,20],iconAnchor:[10,20]});
+    L.marker([v.endLat,v.endLng],{icon:arrowIcon,interactive:false}).addTo(layers.vectors);
+    const labelIcon=L.divIcon({html:`<div style="background:rgba(0,0,0,0.8);border:1px solid ${color};padding:2px 8px;font-family:var(--mono);font-size:10px;color:${color};letter-spacing:1px;white-space:nowrap;font-weight:bold;">${label} ◆ ${v.createdBy}</div>`,className:'',iconSize:[0,0],iconAnchor:[-5,15]});
+    L.marker([v.startLat,v.startLng],{icon:labelIcon,interactive:false}).addTo(layers.vectors);
+    polyline.bindPopup(`<b style="color:${color}">${label}</b><br>От: ${v.createdBy}<br>${new Date(v.createdAt).toLocaleTimeString('ru-RU')}`);
+    if(me?.role==='commander')polyline.on('click',()=>{if(confirm(`Удалить "${label}"?`))socket.emit('vector:delete',v.id);});
+  });
+}
+
+function render(){
+  layers.soldiers.clearLayers();layers.pois.clearLayers();layers.wps.clearLayers();
+  const list=document.getElementById('objList');list.innerHTML='';let rc=0,bc=0;
+  Object.entries(state.players).forEach(([id,p])=>{
+    if(p.team==='red')rc++;if(p.team==='blue')bc++;
+    if(p.team!==me.team||(me.role==='commander'&&p.squad!==me.squad))return;
+    if(!p.lat||!p.lng)return;
+    const age=(Date.now()-p.updatedAt)/1000;let dLat=p.lat,dLng=p.lng;
+    if(age>5&&age<60&&p.velocity){dLat+=p.velocity.dLat*Math.min(age,30);dLng+=p.velocity.dLng*Math.min(age,30);}
+    const isMe=id===me.id,isSOS=p.status==='sos',isCmd=p.role==='commander';
+    const cls=[p.team,isSOS&&'sos',isMe&&'me',isCmd&&'commander'].filter(Boolean).join(' ');
+    const sqLabel=state.squads[p.squad]?.name||p.squad;
+    const html=`<div class="soldier-label"><div class="soldier-info ${cls}"><span class="sq">◆ ${sqLabel.toUpperCase()}</span><span class="nm">${isCmd?'👑 ':''}${p.name}</span></div><div class="marker-circle ${cls}">${isSOS?'🆘':(isCmd?'👑':'🎖️')}</div></div>`;
+    L.marker([dLat,dLng],{icon:L.divIcon({html,className:'',iconSize:[140,72],iconAnchor:[70,66]})}).addTo(layers.soldiers);
+    const div=document.createElement('div');div.className='list-item '+p.team;
+    div.innerHTML=`<span>${isSOS?'🆘':'🎖️'} ${p.name} <span style="color:var(--dim);font-size:9px">[${sqLabel}]</span></span><span style="color:${isSOS?'var(--red)':'var(--dim)'}">${p.status.toUpperCase()}</span>`;
+    list.appendChild(div);
+    if(isMe){const btn=document.getElementById('btnSOS');const st=document.getElementById('myStatus');if(isSOS){btn.textContent='✕ ОТМЕНИТЬ SOS';btn.className='danger';st.textContent='🆘 ТРЕВОГА';st.style.color='var(--red)';}else{btn.textContent='🆘 SOS — ТРЕВОГА';btn.className='warn';st.textContent='В СТРОЮ';st.style.color='var(--green)';}}
+  });
+  Object.values(state.pois).forEach(p=>{if(p.team!=='all'&&p.team!==me.team)return;const owner=p.capturedBy||p.team;const col=owner==='red'?'#ef4444':(owner==='blue'?'#60a5fa':'#d4a017');L.marker([p.lat,p.lng],{icon:L.divIcon({html:`<div style="font-size:24px">${T.poiTypes[p.type]?.icon||'📍'}</div>`,iconAnchor:[15,15]})}).addTo(layers.pois);if(p.radius)L.circle([p.lat,p.lng],{radius:p.radius,color:col,fillColor:col,fillOpacity:.15,weight:2,dashArray:'6,4'}).addTo(layers.pois);});
+  const now=Date.now();Object.values(state.waypoints).forEach(w=>{if(w.expiresAt&&w.expiresAt<now)return;if(w.team!==me.team&&w.squad!==me.squad)return;const ic=T.waypointTypes[w.type]?.icon||'📍';const hasName=w.name&&w.name!==`${ic} ${w.type.toUpperCase()}`;const lbl=hasName?`<div class="wp-name">${w.name}</div>`:'';L.marker([w.lat,w.lng],{icon:L.divIcon({html:`<div style="position:relative">${lbl}<div class="wp-marker ${w.type}"><span>${ic}</span></div></div>`,className:'',iconSize:[40,40],iconAnchor:[20,20]})}).addTo(layers.wps);});
+  document.getElementById('redStat').textContent=`${state.game.scores.red||0}/${rc}`;
+  document.getElementById('blueStat').textContent=`${state.game.scores.blue||0}/${bc}`;
+}
+
+function checkZoneCapture(){if(!myCoords)return;Object.entries(state.pois).forEach(([id,p])=>{if(!p.radius||(p.team!=='all'&&p.team!==me.team)||p.capturedBy===me.team)return;if(map.distance(myCoords,{lat:p.lat,lng:p.lng})<=p.radius)socket.emit('zone:capture',{pointId:id,pointName:p.name,team:me.team,player:me.name});});}
+
+map.on('click',e=>{if(!me||me.role!=='commander'||drawMode)return;pendingWPCoords=e.latlng;const m=document.getElementById('ctxMenu');m.style.left=e.containerPoint.x+'px';m.style.top=e.containerPoint.y+'px';m.classList.add('show');document.getElementById('wpNameInput').value='';setTimeout(()=>document.getElementById('wpNameInput').focus(),50);});
+function closeCtx(){document.getElementById('ctxMenu').classList.remove('show');pendingWPCoords=null;}
+function placeWP(type){if(!pendingWPCoords)return;socket.emit('waypoint:create',{lat:pendingWPCoords.lat,lng:pendingWPCoords.lng,type,name:document.getElementById('wpNameInput').value.trim()||type.toUpperCase(),squad:me.squad,team:me.team,createdBy:me.name});closeCtx();}
+function notify(title,text,type=''){const d=document.createElement('div');d.className='notif '+(type||'');d.innerHTML=`<div class="ntitle">${title}</div><div>${text}</div>`;document.getElementById('notifications').appendChild(d);setTimeout(()=>d.remove(),5000);if(navigator.vibrate)navigator.vibrate(10);}
+
+// === BOT SYSTEM: REALISTIC SWARM MODE ===
+let bots=[],botInterval=null;
+const CALLSIGNS=['Viper','Ghost','Raven','Wolf','Bear','Eagle','Cobra','Hawk','Frost','Blaze','Shadow','Storm','Titan','Reaper','Phoenix','Spectre','Vanguard','Warden','Cipher','Nomad','Jackal','Ronin','Banshee','Dagger','Falcon','Grizzly','Hunter','Iron','Jester','Kestrel','Longbow','Mantis','Nighthawk','Oracle','Patriot','Quake'];
+function startBots(){const count=parseInt(document.getElementById('botCount')?.value)||20;if(bots.length>0)stopBots();const realSquads=Object.entries(state.squads);const centerLat=myCoords?myCoords.lat:C.map.startCenter[0];const centerLng=myCoords?myCoords.lng:C.map.startCenter[1];for(let i=0;i<count;i++){let squadId='free';let team=Math.random()>0.5?'red':'blue';if(realSquads.length>0){const sq=realSquads[i%realSquads.length];squadId=sq[0];team=sq[1].team;}const botName=CALLSIGNS[i%CALLSIGNS.length]+(i>=CALLSIGNS.length?`-${Math.floor(i/CALLSIGNS.length)+1}`:'');const angle=Math.random()*Math.PI*2;const radius=0.0005+Math.random()*0.0015;const bot={id:'bot_'+Date.now()+'_'+i,name:botName,team:team,squad:squadId,role:Math.random()>0.85?'commander':'soldier',lat:centerLat+Math.cos(angle)*radius,lng:centerLng+Math.sin(angle)*radius,status:'online',targetLat:centerLat,targetLng:centerLng,speed:0.0001+Math.random()*0.0002,waitTime:0};bots.push(bot);socket.emit('player:join',{id:bot.id,name:bot.name,team:bot.team,squad:bot.squad,role:bot.role});}botInterval=setInterval(updateBotsSwarm,50);notify('🎬 СИМУЛЯЦИЯ',`Запущено ${count} ботов`,'broadcast');}
+function updateBotsSwarm(){const anchorLat=myCoords?myCoords.lat:C.map.startCenter[0];const anchorLng=myCoords?myCoords.lng:C.map.startCenter[1];bots.forEach(bot=>{if(bot.waitTime>0){bot.waitTime--;return;}const dLat=bot.targetLat-bot.lat;const dLng=bot.targetLng-bot.lng;const distToTarget=Math.sqrt(dLat*dLat+dLng*dLng);const distToPlayer=map.distance({lat:bot.lat,lng:bot.lng},{lat:anchorLat,lng:anchorLng});if(distToTarget<0.0003||distToPlayer>300){const nearbyPois=Object.values(state.pois).filter(p=>{const d=map.distance({lat:p.lat,lng:p.lng},{lat:anchorLat,lng:anchorLng});return d<250&&(p.team==='all'||p.team===bot.team);});if(nearbyPois.length>0&&Math.random()>0.6){const p=nearbyPois[Math.floor(Math.random()*nearbyPois.length)];bot.targetLat=p.lat+(Math.random()-0.5)*0.0005;bot.targetLng=p.lng+(Math.random()-0.5)*0.0005;}else{const angle=Math.random()*Math.PI*2;const r=0.0003+Math.random()*0.001;bot.targetLat=anchorLat+Math.cos(angle)*r;bot.targetLng=anchorLng+Math.sin(angle)*r;}bot.speed=0.0001+Math.random()*0.0002;if(Math.random()>0.7)bot.waitTime=20+Math.random()*60;}else{bot.lat+=(dLat/distToTarget)*bot.speed;bot.lng+=(dLng/distToTarget)*bot.speed;}Object.entries(state.pois).forEach(([id,p])=>{if(!p.radius||(p.team!=='all'&&p.team!==bot.team))return;if(p.capturedBy===bot.team)return;const d=map.distance({lat:bot.lat,lng:bot.lng},{lat:p.lat,lng:p.lng});if(d<=p.radius&&Math.random()<0.03)socket.emit('zone:capture',{pointId:id,pointName:p.name,team:bot.team,player:bot.name});});socket.emit('player:update',{id:bot.id,lat:bot.lat,lng:bot.lng});});}
+function stopBots(){if(botInterval)clearInterval(botInterval);botInterval=null;bots.forEach(bot=>socket.emit('player:leave',bot.id));bots=[];notify('🛑 СИМУЛЯЦИЯ','Боты удалены','');}
+window.addEventListener('beforeunload',()=>{if(bots.length)stopBots();});
+
+socket.on('init',d=>{state=d;render();renderVectors();});
+socket.on('players:update',d=>{state.players=d;render();});
+socket.on('pois:update',d=>{state.pois=d;render();});
+socket.on('waypoints:update',d=>{state.waypoints=d;render();});
+socket.on('vectors:update',d=>{state.vectors=d;renderVectors();});
+socket.on('scores:update',d=>{state.game.scores=d;render();});
+socket.on('squads:update',d=>{state.squads=d;});
+socket.on('game:update',d=>{state.game=d;if(timerInt)clearInterval(timerInt);if(d.timer){const upd=()=>{let ms=d.timer.mode==='countdown'?Math.max(0,d.timer.endTime-Date.now()):Date.now()-d.timer.startTime;document.getElementById('timerStat').textContent=`${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;};upd();timerInt=setInterval(upd,1000);}else document.getElementById('timerStat').textContent='00:00';});
+socket.on('notification',d=>notify(d.title,d.text,d.type));
+socket.on('broadcast',d=>{if(d.target==='all'||d.target===me.team)notify('📡 ВЕЩАНИЕ',d.message,'broadcast');});
+
+const saved=localStorage.getItem('me');if(saved){try{me=JSON.parse(saved);resolveSquad().then(()=>startSession());}catch(e){}}
+window.addEventListener('load',()=>{const bar=document.getElementById('splashBar'),sp=document.getElementById('splash');let p=0;const iv=setInterval(()=>{p+=Math.random()*25;if(p>=100){p=100;clearInterval(iv);setTimeout(()=>{sp.style.opacity='0';setTimeout(()=>sp.remove(),500);},300);}bar.style.width=p+'%';},200);});
+</script>
+</body>
+</html>

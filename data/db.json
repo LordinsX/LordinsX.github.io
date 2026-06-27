@@ -1,0 +1,1404 @@
+{
+  "squads": {
+    "DF73F649": {
+      "name": "Deathbringer",
+      "team": "red",
+      "id": "DF73F649",
+      "createdAt": 1782144735899
+    },
+    "49D3E742": {
+      "name": "жопа",
+      "team": "red",
+      "id": "49D3E742",
+      "createdAt": 1782144738585
+    },
+    "3FC421EB": {
+      "name": "123",
+      "team": "red",
+      "id": "3FC421EB",
+      "createdAt": 1782237479932
+    },
+    "2561572D": {
+      "name": "жш23г9укнрцугшкнарпцук",
+      "team": "blue",
+      "id": "2561572D",
+      "createdAt": 1782238226725
+    }
+  },
+  "players": {
+    "c_2561572D": {
+      "id": "c_2561572D",
+      "name": "Командир",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "commander",
+      "squadName": "2561572D",
+      "socketId": "NynFcHBeRyyyAtezAAAz",
+      "status": "online",
+      "updatedAt": 1782242510636,
+      "lat": 54.73514556884766,
+      "lng": 55.9587287902832,
+      "velocity": null
+    },
+    "bot_1782326233309_1": {
+      "id": "bot_1782326233309_1",
+      "name": "Ghost",
+      "team": "red",
+      "squad": "49D3E742",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782326794387,
+      "lat": 55.75533277700797,
+      "lng": 37.61729424982321,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233309_2": {
+      "id": "bot_1782326233309_2",
+      "name": "Raven",
+      "team": "red",
+      "squad": "3FC421EB",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782326805875,
+      "lat": 55.755622031947915,
+      "lng": 37.617552385214935,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233309_3": {
+      "id": "bot_1782326233309_3",
+      "name": "Wolf",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782329088357,
+      "lat": 55.75609314977794,
+      "lng": 37.6179589153201,
+      "velocity": null
+    },
+    "bot_1782326233309_4": {
+      "id": "bot_1782326233309_4",
+      "name": "Bear",
+      "team": "red",
+      "squad": "DF73F649",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327948378,
+      "lat": 55.75581122511951,
+      "lng": 37.61661169068331,
+      "velocity": null
+    },
+    "bot_1782326233309_5": {
+      "id": "bot_1782326233309_5",
+      "name": "Eagle",
+      "team": "red",
+      "squad": "49D3E742",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782328788356,
+      "lat": 55.75559218030018,
+      "lng": 37.617626604384874,
+      "velocity": null
+    },
+    "bot_1782326233309_6": {
+      "id": "bot_1782326233309_6",
+      "name": "Cobra",
+      "team": "red",
+      "squad": "3FC421EB",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327888395,
+      "lat": 55.754905191261614,
+      "lng": 37.61709010568227,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233309_7": {
+      "id": "bot_1782326233309_7",
+      "name": "Hawk",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "commander",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782329148357,
+      "lat": 55.75614124731437,
+      "lng": 37.617349778476196,
+      "velocity": null
+    },
+    "bot_1782326233309_8": {
+      "id": "bot_1782326233309_8",
+      "name": "Frost",
+      "team": "red",
+      "squad": "DF73F649",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782329148358,
+      "lat": 55.755114326207476,
+      "lng": 37.61725482329358,
+      "velocity": null
+    },
+    "bot_1782326233309_9": {
+      "id": "bot_1782326233309_9",
+      "name": "Blaze",
+      "team": "red",
+      "squad": "49D3E742",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327108379,
+      "lat": 55.75528392919232,
+      "lng": 37.61791359697506,
+      "velocity": null
+    },
+    "bot_1782326233309_10": {
+      "id": "bot_1782326233309_10",
+      "name": "Shadow",
+      "team": "red",
+      "squad": "3FC421EB",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327228403,
+      "lat": 55.755742818889566,
+      "lng": 37.61817597310749,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233309_11": {
+      "id": "bot_1782326233309_11",
+      "name": "Storm",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327528384,
+      "lat": 55.7557223675778,
+      "lng": 37.61737083057666,
+      "velocity": null
+    },
+    "bot_1782326233309_12": {
+      "id": "bot_1782326233309_12",
+      "name": "Titan",
+      "team": "red",
+      "squad": "DF73F649",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327888397,
+      "lat": 55.75639121380607,
+      "lng": 37.61730619858906,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233309_13": {
+      "id": "bot_1782326233309_13",
+      "name": "Reaper",
+      "team": "red",
+      "squad": "49D3E742",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327888383,
+      "lat": 55.756038854266855,
+      "lng": 37.617890071661485,
+      "velocity": null
+    },
+    "bot_1782326233310_14": {
+      "id": "bot_1782326233310_14",
+      "name": "Phoenix",
+      "team": "red",
+      "squad": "3FC421EB",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327408389,
+      "lat": 55.7554401369225,
+      "lng": 37.61801591023556,
+      "velocity": null
+    },
+    "bot_1782326233310_15": {
+      "id": "bot_1782326233310_15",
+      "name": "Spectre",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "commander",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782326791399,
+      "lat": 55.75601804820543,
+      "lng": 37.61778898264302,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    },
+    "bot_1782326233310_16": {
+      "id": "bot_1782326233310_16",
+      "name": "Vanguard",
+      "team": "red",
+      "squad": "DF73F649",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327348380,
+      "lat": 55.756174509430394,
+      "lng": 37.61689495788177,
+      "velocity": null
+    },
+    "bot_1782326233310_17": {
+      "id": "bot_1782326233310_17",
+      "name": "Warden",
+      "team": "red",
+      "squad": "49D3E742",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782328308368,
+      "lat": 55.75610181943636,
+      "lng": 37.61768794900406,
+      "velocity": null
+    },
+    "bot_1782326233310_18": {
+      "id": "bot_1782326233310_18",
+      "name": "Cipher",
+      "team": "red",
+      "squad": "3FC421EB",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782328308369,
+      "lat": 55.75522922279365,
+      "lng": 37.61713238764298,
+      "velocity": null
+    },
+    "bot_1782326233310_19": {
+      "id": "bot_1782326233310_19",
+      "name": "Nomad",
+      "team": "blue",
+      "squad": "2561572D",
+      "role": "soldier",
+      "socketId": "TirHsq1SjDxXFoo-AAAF",
+      "status": "online",
+      "updatedAt": 1782327648374,
+      "lat": 55.755522833894815,
+      "lng": 37.616906503253226,
+      "velocity": null
+    },
+    "c_DF73F649": {
+      "id": "c_DF73F649",
+      "name": "Командир",
+      "team": "red",
+      "squad": "DF73F649",
+      "role": "commander",
+      "squadName": "DF73F649",
+      "socketId": "-5icxyVxwAyvLKWaAAAJ",
+      "status": "online",
+      "updatedAt": 1782326950104,
+      "lat": 54.73514556884766,
+      "lng": 55.9587287902832,
+      "velocity": {
+        "dLat": 0,
+        "dLng": 0
+      }
+    }
+  },
+  "pois": {
+    "5eedb1ba-020f-434b-a15f-c7dc3a42b972": {
+      "name": "23123",
+      "lat": 54.736317,
+      "lng": 55.95954,
+      "type": "danger",
+      "team": "all",
+      "radius": 30,
+      "id": "5eedb1ba-020f-434b-a15f-c7dc3a42b972",
+      "createdAt": 1782238699241
+    },
+    "28d619ce-7da5-46d1-8e2c-04aef8914657": {
+      "name": "123",
+      "lat": 1,
+      "lng": 1,
+      "type": "medic",
+      "team": "all",
+      "radius": 50,
+      "id": "28d619ce-7da5-46d1-8e2c-04aef8914657",
+      "createdAt": 1782242769300
+    },
+    "dd210c10-67cc-4ca6-8b03-0bd691e322f1": {
+      "name": "ТОЧКА А",
+      "lat": 55.757247,
+      "lng": 37.612856,
+      "type": "flag",
+      "team": "all",
+      "radius": 50,
+      "id": "dd210c10-67cc-4ca6-8b03-0bd691e322f1",
+      "createdAt": 1782325709979
+    }
+  },
+  "waypoints": {
+    "3e0f0478-57fc-4f04-855c-854abd1247cc": {
+      "lat": 54.695538245514115,
+      "lng": 56.18381381034851,
+      "type": "target",
+      "squad": "3BDBC656",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "3e0f0478-57fc-4f04-855c-854abd1247cc",
+      "createdAt": 1782144731476,
+      "expiresAt": 1782145331476
+    },
+    "18a4f5cd-e5c1-4b75-9413-43754fe89448": {
+      "lat": 54.73863307086649,
+      "lng": 55.961930751800544,
+      "type": "enemy",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "18a4f5cd-e5c1-4b75-9413-43754fe89448",
+      "createdAt": 1782144762190,
+      "expiresAt": 1782145362190
+    },
+    "54923282-cb02-4246-a714-ec66bc013619": {
+      "lat": 54.73718368773036,
+      "lng": 55.963883399963386,
+      "type": "target",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "54923282-cb02-4246-a714-ec66bc013619",
+      "createdAt": 1782144768181,
+      "expiresAt": 1782145368181
+    },
+    "8db0b69b-f4ce-4211-bea1-b533108640d2": {
+      "lat": 54.7406522105011,
+      "lng": 55.95787525177002,
+      "type": "attention",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "8db0b69b-f4ce-4211-bea1-b533108640d2",
+      "createdAt": 1782144771201,
+      "expiresAt": 1782145371201
+    },
+    "9b2ac5c5-004c-4bc6-ae49-3f89fe4c74fa": {
+      "lat": 54.737542941375516,
+      "lng": 55.95452785491944,
+      "type": "move",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "9b2ac5c5-004c-4bc6-ae49-3f89fe4c74fa",
+      "createdAt": 1782144773298,
+      "expiresAt": 1782145373298
+    },
+    "8dc6cdc0-b366-42fd-8c1d-36dacbbd64e4": {
+      "lat": 54.6946963580242,
+      "lng": 56.187886780281,
+      "type": "enemy",
+      "team": "red",
+      "squad": "DF73F649",
+      "createdBy": "Командир",
+      "id": "8dc6cdc0-b366-42fd-8c1d-36dacbbd64e4",
+      "createdAt": 1782233357348,
+      "expiresAt": 1782233957348
+    },
+    "edfe2d53-6885-484b-834a-dec0a3879d02": {
+      "lat": 54.69466347462758,
+      "lng": 56.18878577255974,
+      "type": "target",
+      "team": "red",
+      "squad": "DF73F649",
+      "createdBy": "Командир",
+      "id": "edfe2d53-6885-484b-834a-dec0a3879d02",
+      "createdAt": 1782233358904,
+      "expiresAt": 1782233958904
+    },
+    "8ea49e3f-a372-4313-9a82-f87e9dd261ed": {
+      "lat": 54.694207488780826,
+      "lng": 56.18757952975534,
+      "type": "attention",
+      "team": "red",
+      "squad": "DF73F649",
+      "createdBy": "Командир",
+      "id": "8ea49e3f-a372-4313-9a82-f87e9dd261ed",
+      "createdAt": 1782233362143,
+      "expiresAt": 1782233962143
+    },
+    "58785673-23b0-4760-837e-1df28483e341": {
+      "lat": 55.77193853272883,
+      "lng": 37.58972167968751,
+      "type": "enemy",
+      "name": "🎯 ENEMY",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "58785673-23b0-4760-837e-1df28483e341",
+      "createdAt": 1782234435518,
+      "expiresAt": 1782235035518
+    },
+    "c61d0f8e-e2da-4da7-ba90-787d9188e4f9": {
+      "lat": 55.77039358162006,
+      "lng": 37.62336730957032,
+      "type": "target",
+      "name": "жопа",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "c61d0f8e-e2da-4da7-ba90-787d9188e4f9",
+      "createdAt": 1782234440793,
+      "expiresAt": 1782235040793
+    },
+    "e4a5c85f-c97d-470f-88c2-9486121fff71": {
+      "lat": 54.7383729289938,
+      "lng": 55.95957040786744,
+      "type": "move",
+      "name": "➡️ MOVE",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "e4a5c85f-c97d-470f-88c2-9486121fff71",
+      "createdAt": 1782234452702,
+      "expiresAt": 1782235052702
+    },
+    "6d349a5d-0575-4f5d-98bc-682d821b9997": {
+      "lat": 54.737827864415,
+      "lng": 55.9610939025879,
+      "type": "target",
+      "name": "алкаши",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "6d349a5d-0575-4f5d-98bc-682d821b9997",
+      "createdAt": 1782234458926,
+      "expiresAt": 1782235058926
+    },
+    "764d22c6-c799-46b6-be33-d3b7380107db": {
+      "lat": 55.77261442958424,
+      "lng": 37.62165069580079,
+      "type": "enemy",
+      "name": "123",
+      "squad": "3FC421EB",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "764d22c6-c799-46b6-be33-d3b7380107db",
+      "createdAt": 1782237491997,
+      "expiresAt": 1782238091997
+    },
+    "5a9c81b3-34be-4c12-88b0-f01dfd22daa7": {
+      "lat": 55.762088420277124,
+      "lng": 37.57890701293946,
+      "type": "target",
+      "name": "📍 TARGET",
+      "squad": "3FC421EB",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "5a9c81b3-34be-4c12-88b0-f01dfd22daa7",
+      "createdAt": 1782237493341,
+      "expiresAt": 1782238093341
+    },
+    "b755f4ce-9f30-4e3c-863c-00a4df2d2be6": {
+      "lat": 55.751366352300806,
+      "lng": 37.62937545776368,
+      "type": "attention",
+      "name": "⚠️ ATTENTION",
+      "squad": "3FC421EB",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "b755f4ce-9f30-4e3c-863c-00a4df2d2be6",
+      "createdAt": 1782237494595,
+      "expiresAt": 1782238094595
+    },
+    "6bebe455-27f3-49d0-9aef-1fb5902adf3f": {
+      "lat": 55.78073718271918,
+      "lng": 37.57427820153833,
+      "type": "enemy",
+      "name": "Алкаши тут",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "6bebe455-27f3-49d0-9aef-1fb5902adf3f",
+      "createdAt": 1782238105285,
+      "expiresAt": 1782238705285
+    },
+    "cc4d97b7-91e6-419e-a0d2-6c378a10057a": {
+      "lat": 55.776368229197544,
+      "lng": 37.611299993270265,
+      "type": "attention",
+      "name": "⚠️ ATTENTION",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "cc4d97b7-91e6-419e-a0d2-6c378a10057a",
+      "createdAt": 1782238110750,
+      "expiresAt": 1782238710750
+    },
+    "f4823d88-7960-40ed-9335-5554a62ff7eb": {
+      "lat": 54.73586080091677,
+      "lng": 55.95932273493248,
+      "type": "enemy",
+      "name": "🎯 ENEMY",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "f4823d88-7960-40ed-9335-5554a62ff7eb",
+      "createdAt": 1782238752208,
+      "expiresAt": 1782239352208
+    },
+    "8ff15db2-7676-4a4d-8f04-221f029fe921": {
+      "lat": 54.736099510317075,
+      "lng": 55.95831373937913,
+      "type": "enemy",
+      "name": "СВЕРХУ ДИКИЙ",
+      "squad": "2561572D",
+      "team": "blue",
+      "createdBy": "Командир",
+      "id": "8ff15db2-7676-4a4d-8f04-221f029fe921",
+      "createdAt": 1782238757765,
+      "expiresAt": 1782239357765
+    },
+    "635965de-f117-4294-8bda-a3e16e285441": {
+      "lat": 54.73509867341791,
+      "lng": 55.95873857961213,
+      "type": "enemy",
+      "name": "ПИДОРАСЫ ЗДЕСЬ",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "635965de-f117-4294-8bda-a3e16e285441",
+      "createdAt": 1782238809321,
+      "expiresAt": 1782239409321
+    },
+    "888f2d0d-282d-4be6-9f76-c0a2c392ea2e": {
+      "lat": 54.73611829611905,
+      "lng": 55.96169471740723,
+      "type": "enemy",
+      "name": "ОКАК",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "888f2d0d-282d-4be6-9f76-c0a2c392ea2e",
+      "createdAt": 1782324436711,
+      "expiresAt": 1782325036711
+    },
+    "1c4560ae-9c0e-4136-a89c-f3a36462caf5": {
+      "lat": 55.75803376540896,
+      "lng": 37.623134828332134,
+      "type": "enemy",
+      "name": "ПРОТИВНИК",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "1c4560ae-9c0e-4136-a89c-f3a36462caf5",
+      "createdAt": 1782325527884,
+      "expiresAt": 1782326127884
+    },
+    "71930262-e5a1-45a6-b041-607131a449b8": {
+      "lat": 55.75828135516279,
+      "lng": 37.61592771723677,
+      "type": "attention",
+      "name": "ATTENTION",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "71930262-e5a1-45a6-b041-607131a449b8",
+      "createdAt": 1782325530554,
+      "expiresAt": 1782326130554
+    },
+    "d6fd4f89-81e5-4a43-a7b3-db671b0a3cac": {
+      "lat": 55.75571146775894,
+      "lng": 37.62190582622957,
+      "type": "target",
+      "name": "TARGET",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "d6fd4f89-81e5-4a43-a7b3-db671b0a3cac",
+      "createdAt": 1782325533640,
+      "expiresAt": 1782326133640
+    },
+    "1e654841-af73-4da8-a176-2ed961cb9613": {
+      "lat": 55.754832032184964,
+      "lng": 37.61257451396924,
+      "type": "move",
+      "name": "MOVE",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "1e654841-af73-4da8-a176-2ed961cb9613",
+      "createdAt": 1782325538113,
+      "expiresAt": 1782326138113
+    },
+    "25c02c7d-1f9f-421d-ac4f-08119d3e8443": {
+      "lat": 55.75843503077112,
+      "lng": 37.619584377813595,
+      "type": "move",
+      "name": "Конвой",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "25c02c7d-1f9f-421d-ac4f-08119d3e8443",
+      "createdAt": 1782325547098,
+      "expiresAt": 1782326147098
+    },
+    "f1cd98cb-4402-4456-8d62-31bdc507a258": {
+      "lat": 55.757621250173806,
+      "lng": 37.61434435844422,
+      "type": "move",
+      "name": "MOVE",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "f1cd98cb-4402-4456-8d62-31bdc507a258",
+      "createdAt": 1782326256838,
+      "expiresAt": 1782326856838
+    }
+  },
+  "game": {
+    "status": "running",
+    "timer": {
+      "mode": "countdown",
+      "endTime": 1782332157032
+    },
+    "scores": {
+      "red": 0,
+      "blue": 0
+    },
+    "broadcasts": [
+      {
+        "target": "all",
+        "message": "120938210938123",
+        "time": 1782238159958
+      }
+    ],
+    "captures": []
+  },
+  "events": [
+    {
+      "type": "target",
+      "team": "red",
+      "squad": "3BDBC656",
+      "player": "Командир",
+      "time": 1782144731478
+    },
+    {
+      "type": "SQUAD_CREATED",
+      "squad": "DF73F649",
+      "name": "Deathbringer",
+      "team": "red",
+      "time": 1782144735900
+    },
+    {
+      "type": "SQUAD_CREATED",
+      "squad": "49D3E742",
+      "name": "жопа",
+      "team": "red",
+      "time": 1782144738586
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782144740665
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782144758750
+    },
+    {
+      "type": "enemy",
+      "team": "red",
+      "squad": "DF73F649",
+      "player": "Командир",
+      "time": 1782144762191
+    },
+    {
+      "type": "target",
+      "team": "red",
+      "squad": "DF73F649",
+      "player": "Командир",
+      "time": 1782144768182
+    },
+    {
+      "type": "attention",
+      "team": "red",
+      "squad": "DF73F649",
+      "player": "Командир",
+      "time": 1782144771202
+    },
+    {
+      "type": "move",
+      "team": "red",
+      "squad": "DF73F649",
+      "player": "Командир",
+      "time": 1782144773299
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782233287859
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782233345146
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782234422615
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Райдер",
+      "team": "red",
+      "time": 1782234530416
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782237460582
+    },
+    {
+      "type": "SQUAD_CREATED",
+      "squad": "3FC421EB",
+      "name": "123",
+      "time": 1782237479933
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782237489365
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782237523757
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782237648044
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782237661301
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782238091400
+    },
+    {
+      "type": "SOS",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782238120861
+    },
+    {
+      "type": "GAME_START",
+      "duration": 120,
+      "time": 1782238151252
+    },
+    {
+      "type": "BROADCAST",
+      "target": "all",
+      "time": 1782238159959
+    },
+    {
+      "type": "SOS",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782238205080
+    },
+    {
+      "type": "SQUAD_CREATED",
+      "squad": "2561572D",
+      "name": "жш23г9укнрцугшкнарпцук",
+      "time": 1782238226726
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "blue",
+      "time": 1782238445220
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "blue",
+      "time": 1782238545997
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782238580738
+    },
+    {
+      "type": "danger",
+      "name": "23123",
+      "time": 1782238699243
+    },
+    {
+      "type": "GAME_START",
+      "duration": 120,
+      "time": 1782239174263
+    },
+    {
+      "type": "SOS",
+      "player": "Командир",
+      "team": "blue",
+      "time": 1782240147637
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782242480846
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782242486491
+    },
+    {
+      "type": "SOS",
+      "player": "123",
+      "team": "red",
+      "time": 1782242490979
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782242501860
+    },
+    {
+      "type": "SOS_CANCELLED",
+      "player": "Командир",
+      "team": "blue",
+      "time": 1782242510637
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782242705029
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782242755161
+    },
+    {
+      "type": "medic",
+      "name": "123",
+      "time": 1782242769302
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "123",
+      "team": "red",
+      "time": 1782324350356
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782324419292
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782325452082
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Viper",
+      "team": "red",
+      "time": 1782325467116
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Ghost",
+      "team": "red",
+      "time": 1782325467118
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Raven",
+      "team": "red",
+      "time": 1782325467119
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Wolf",
+      "team": "blue",
+      "time": 1782325467121
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Bear",
+      "team": "red",
+      "time": 1782325467122
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Eagle",
+      "team": "red",
+      "time": 1782325467124
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cobra",
+      "team": "red",
+      "time": 1782325467125
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Hawk",
+      "team": "blue",
+      "time": 1782325467127
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Frost",
+      "team": "red",
+      "time": 1782325467129
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Blaze",
+      "team": "red",
+      "time": 1782325467130
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Shadow",
+      "team": "red",
+      "time": 1782325467132
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Storm",
+      "team": "blue",
+      "time": 1782325467133
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Titan",
+      "team": "red",
+      "time": 1782325467135
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Reaper",
+      "team": "red",
+      "time": 1782325467136
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Phoenix",
+      "team": "red",
+      "time": 1782325467138
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Spectre",
+      "team": "blue",
+      "time": 1782325467140
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Vanguard",
+      "team": "red",
+      "time": 1782325467142
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Warden",
+      "team": "red",
+      "time": 1782325467143
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cipher",
+      "team": "red",
+      "time": 1782325467145
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Nomad",
+      "team": "blue",
+      "time": 1782325467147
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782325471945
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Viper",
+      "team": "red",
+      "time": 1782325488991
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Ghost",
+      "team": "red",
+      "time": 1782325488993
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Raven",
+      "team": "red",
+      "time": 1782325488995
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Wolf",
+      "team": "blue",
+      "time": 1782325488996
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Bear",
+      "team": "red",
+      "time": 1782325488998
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Eagle",
+      "team": "red",
+      "time": 1782325488999
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cobra",
+      "team": "red",
+      "time": 1782325489001
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Hawk",
+      "team": "blue",
+      "time": 1782325489002
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Frost",
+      "team": "red",
+      "time": 1782325489004
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Blaze",
+      "team": "red",
+      "time": 1782325489005
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Shadow",
+      "team": "red",
+      "time": 1782325489007
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Storm",
+      "team": "blue",
+      "time": 1782325489008
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Titan",
+      "team": "red",
+      "time": 1782325489010
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Reaper",
+      "team": "red",
+      "time": 1782325489011
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Phoenix",
+      "team": "red",
+      "time": 1782325489013
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Spectre",
+      "team": "blue",
+      "time": 1782325489015
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Vanguard",
+      "team": "red",
+      "time": 1782325489016
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Warden",
+      "team": "red",
+      "time": 1782325489018
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cipher",
+      "team": "red",
+      "time": 1782325489020
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Nomad",
+      "team": "blue",
+      "time": 1782325489021
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782325509000
+    },
+    {
+      "type": "flag",
+      "name": "ТОЧКА А",
+      "time": 1782325709980
+    },
+    {
+      "type": "GAME_START",
+      "duration": 100,
+      "time": 1782326157033
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Viper",
+      "team": "red",
+      "time": 1782326233326
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Ghost",
+      "team": "red",
+      "time": 1782326233327
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Raven",
+      "team": "red",
+      "time": 1782326233329
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Wolf",
+      "team": "blue",
+      "time": 1782326233330
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Bear",
+      "team": "red",
+      "time": 1782326233332
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Eagle",
+      "team": "red",
+      "time": 1782326233333
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cobra",
+      "team": "red",
+      "time": 1782326233335
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Hawk",
+      "team": "blue",
+      "time": 1782326233336
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Frost",
+      "team": "red",
+      "time": 1782326233338
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Blaze",
+      "team": "red",
+      "time": 1782326233339
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Shadow",
+      "team": "red",
+      "time": 1782326233341
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Storm",
+      "team": "blue",
+      "time": 1782326233343
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Titan",
+      "team": "red",
+      "time": 1782326233344
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Reaper",
+      "team": "red",
+      "time": 1782326233346
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Phoenix",
+      "team": "red",
+      "time": 1782326233347
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Spectre",
+      "team": "blue",
+      "time": 1782326233349
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Vanguard",
+      "team": "red",
+      "time": 1782326233350
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Warden",
+      "team": "red",
+      "time": 1782326233352
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Cipher",
+      "team": "red",
+      "time": 1782326233357
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Nomad",
+      "team": "blue",
+      "time": 1782326233358
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782326240950
+    },
+    {
+      "type": "PLAYER_JOIN",
+      "player": "Командир",
+      "team": "red",
+      "time": 1782326260615
+    },
+    {
+      "type": "attack",
+      "squad": "DF73F649",
+      "by": "Командир",
+      "time": 1782326272354
+    },
+    {
+      "type": "defend",
+      "squad": "DF73F649",
+      "by": "Командир",
+      "time": 1782326279940
+    },
+    {
+      "type": "move",
+      "squad": "DF73F649",
+      "by": "Командир",
+      "time": 1782326297870
+    }
+  ],
+  "vectors": {
+    "bb92e5ae-9fbe-445d-8fbb-184786f6f403": {
+      "startLat": 55.75646211702207,
+      "startLng": 37.615020275115974,
+      "endLat": 55.75700546497639,
+      "endLng": 37.61334657669068,
+      "type": "attack",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "bb92e5ae-9fbe-445d-8fbb-184786f6f403",
+      "createdAt": 1782326272353,
+      "expiresAt": 1782327172353
+    },
+    "ce5e3969-faee-4f0a-8f78-3cc9a89801ef": {
+      "startLat": 55.756389670056244,
+      "startLng": 37.61406540870667,
+      "endLat": 55.754989002265646,
+      "endLng": 37.6148271560669,
+      "type": "defend",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "ce5e3969-faee-4f0a-8f78-3cc9a89801ef",
+      "createdAt": 1782326279939,
+      "expiresAt": 1782327179939
+    },
+    "4b8addb2-4177-4c63-adfb-4bbe28a5262b": {
+      "startLat": 55.75699339065963,
+      "startLng": 37.61693000793458,
+      "endLat": 55.75754880536109,
+      "endLng": 37.61440873146058,
+      "type": "move",
+      "squad": "DF73F649",
+      "team": "red",
+      "createdBy": "Командир",
+      "id": "4b8addb2-4177-4c63-adfb-4bbe28a5262b",
+      "createdAt": 1782326297868,
+      "expiresAt": 1782327197868
+    }
+  }
+}
