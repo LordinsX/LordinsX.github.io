@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIRSOFT OPS // Анонсы страйкбольных игр</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0d08;
+    --bg2: #141812;
+    --bg3: #1e241a;
+    --border: #2a3020;
+    --accent: #d4a017;
+    --accent2: #f4c430;
+    --green: #4ade80;
+    --red: #ef4444;
+    --blue: #60a5fa;
+    --text: #c8d4c8;
+    --dim: #7a8a7a;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* CRT scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  a { color: var(--accent2); text-decoration: none; }
+
+  header {
+    border-bottom: 2px solid var(--accent);
+    background: linear-gradient(180deg, var(--bg2), var(--bg));
+    padding: 20px clamp(16px, 4vw, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: clamp(18px, 3vw, 26px);
+    color: var(--accent2);
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px rgba(244,196,48,.4);
+  }
+  .logo span { color: var(--dim); }
+
+  nav { display: flex; gap: 16px; font-family: var(--mono); font-size: 14px; }
+  nav a { color: var(--dim); }
+  nav a.active, nav a:hover { color: var(--accent2); }
+
+  .hero {
+    padding: clamp(28px, 6vw, 64px) clamp(16px, 4vw, 48px) 24px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .hero h1 b { color: var(--accent2); }
+  .hero p { color: var(--dim); margin-top: 8px; font-size: 16px; letter-spacing: 1px; }
+
+  .toolbar {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 12px clamp(16px, 4vw, 48px);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar input, .toolbar select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+  }
+  .toolbar input:focus, .toolbar select:focus { border-color: var(--accent); }
+  .toolbar input { flex: 1; min-width: 180px; }
+
+  .btn {
+    background: var(--accent);
+    color: #0a0d08;
+    border: none;
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 9px 18px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: .15s;
+  }
+  .btn:hover { background: var(--accent2); box-shadow: 0 0 14px rgba(244,196,48,.4); }
+  .btn.ghost {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent);
+  }
+  .btn.danger { background: var(--red); color: #fff; }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 12px clamp(16px, 4vw, 48px) 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    transition: .15s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card.past { opacity: .55; border-left-color: var(--dim); }
+  .card.soon { border-left-color: var(--green); }
+
+  .card .status {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border: 1px solid;
+    letter-spacing: 1px;
+  }
+  .status.open { color: var(--green); border-color: var(--green); }
+  .status.full { color: var(--red); border-color: var(--red); }
+  .status.done { color: var(--dim); border-color: var(--dim); }
+
+  .card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    padding-right: 80px;
+  }
+
+  .meta { font-family: var(--mono); font-size: 13px; color: var(--dim); display: grid; gap: 3px; }
+  .meta b { color: var(--text); font-weight: normal; }
+
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--blue);
+    padding: 2px 8px;
+  }
+
+  .desc { font-size: 15px; line-height: 1.45; color: var(--text); white-space: pre-line; }
+
+  .slots { margin-top: auto; }
+  .bar { height: 6px; background: var(--bg3); border: 1px solid var(--border); }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .slots small { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+
+  .actions { display: flex; gap: 8px; margin-top: 4px; }
+  .actions .btn { flex: 1; padding: 8px 10px; font-size: 13px; }
+
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    font-family: var(--mono);
+    color: var(--dim);
+    padding: 60px 0;
+    border: 1px dashed var(--border);
+  }
+
+  footer {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--dim);
+    padding: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Modal */
+  dialog {
+    background: var(--bg2);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    max-width: 480px;
+    width: calc(100% - 32px);
+    padding: 0;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.75); }
+  .modal-body { padding: 22px; display: grid; gap: 12px; }
+  .modal-body h3 { font-family: var(--mono); color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; }
+  .field label { display: block; font-family: var(--mono); font-size: 12px; color: var(--dim); margin-bottom: 4px; letter-spacing: 1px; }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 8px 10px;
+    outline: none;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AIRSOFT<span>//</span>OPS</div>
+  <nav>
+    <a href="/games.html" class="active">ИГРЫ</a>
+    <a href="/">ТАКТИЧЕСКАЯ КАРТА</a>
+    <a href="/admin.html">КОМАНДНЫЙ ПУНКТ</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Анонсы <b>страйкбольных игр</b></h1>
+  <p>ПОЛИГОН // ВЫЕЗД // МЕСТО // СЦЕНАРИЙ — выбирай игру и записывайся в состав</p>
+</section>
+
+<div class="toolbar">
+  <input id="q" type="search" placeholder="Поиск по названию / месту...">
+  <select id="filter">
+    <option value="upcoming">Предстоящие</option>
+    <option value="all">Все игры</option>
+    <option value="past">Прошедшие</option>
+  </select>
+  <button class="btn ghost" id="addBtn">+ Добавить игру</button>
+</div>
+
+<main id="list"></main>
+
+<footer>AIRSOFT OPS © 2026 · MILES PROOF OF GUNPOWDER · данные хранятся локально в браузере (localStorage)</footer>
+
+<dialog id="dlg">
+  <form method="dialog" class="modal-body" id="form">
+    <h3>Новая игра</h3>
+    <div class="field"><label>Название *</label><input name="title" required maxlength="80" placeholder="Весенний перформанс «Периметр»"></div>
+    <div class="row2">
+      <div class="field"><label>Дата и время *</label><input name="when" type="datetime-local" required></div>
+      <div class="field"><label>Место *</label><input name="where" required maxlength="80" placeholder="Полигон «Дубрава»"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Формат</label><input name="format" maxlength="40" placeholder="Сценарка / Милитари / TDM"></div>
+      <div class="field"><label>Взвод (джоули), ₽</label><input name="price" type="number" min="0" placeholder="800"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Макс. участников</label><input name="slots" type="number" min="1" placeholder="40"></div>
+      <div class="field"><label>Записалось</label><input name="taken" type="number" min="0" placeholder="0"></div>
+    </div>
+    <div class="field"><label>Описание / брифинг</label><textarea name="desc" rows="4" maxlength="1500" placeholder="Легенда, правила, ограничения по приводу, форма команд..."></textarea></div>
+    <div class="actions">
+      <button class="btn" value="save">Сохранить</button>
+      <button class="btn ghost" value="cancel">Отмена</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const LS_KEY = 'airsoft_games_v1';
+
+const seed = [
+  {
+    id: 'g1', title: 'Весенний перформанс «ПЕРИМЕТР»',
+    when: iso(+days(6), 10), where: 'Полигон «Дубрава», 30 км от МКАД',
+    format: 'Сценарная игра, 2 команды', price: 900, slots: 60, taken: 47,
+    desc: 'Легенда: заброшенный научный городок, две ЧВК делят контейнер с образцами.\nРежим: сутки на позиции, ночной этап обязателен.\nОграничения: 0.43 г, стартовые патефоны, форма камуфляж.\nПоле 12 га, техника, импровизированные здания, медэвак через координаторов.'
+  },
+  {
+    id: 'g2', title: 'MILSIM «ДОРОГА ГНЕВА»',
+    when: iso(+days(14), 9), where: 'Карьер «Северный»',
+    format: 'MilSim, конвои, 48 часов', price: 2500, slots: 40, taken: 40,
+    desc: 'Двухсуточная милсим-операция: сопровождение конвоев, удержание КТ, радиосвязь в единой сетке.\nТребования: рация, спальный мешок, 3 дня еды, исправный привод.\nРоль снайпера — только с оптикой от 8x и болтовик/DMR.'
+  },
+  {
+    id: 'g3', title: 'Пятничный CQB «Подвал»',
+    when: iso(+days(2), 19), where: 'Сцена ТЦ «Стройка», ангар 4',
+    format: 'CQB, 5 на 5', price: 400, slots: 20, taken: 12,
+    desc: 'Быстрый закрытый бой в помещении. Ограничение 0.30 г, только короткоствол + ПП или короче 30 см ствол.\nФормат: раунды по 7 минут, защита обязательна (очки/маска + бандана).\nПивпоин после игры включён во взвод.'
+  },
+  {
+    id: 'g4', title: 'Зарница для новичков',
+    when: iso(-days(21), 12), where: 'Лесополоса, ур. Берёзовка',
+    format: 'TDM, свободные правила', price: 0, slots: 30, taken: 26,
+    desc: 'Пробная бесплатная игра: выдаём приводы и маски, объясняем правила за 20 минут.\nИдеально, чтобы впервые подстрелить соседа по команде.'
+  }
+];
+
+function days(n){ const d = new Date(); d.setDate(d.getDate()+n); return d; }
+function iso(d, h){ d.setHours(h,0,0,0); const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+let games = load();
+if (!games) { games = seed; save(); }
+
+function load(){ try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(games)); }
+
+const $ = s => document.querySelector(s);
+const list = $('#list'), dlg = $('#dlg'), form = $('#form');
+
+function fmtDate(isoStr){
+  const d = new Date(isoStr);
+  return d.toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' }) +
+    ', ' + d.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function render(){
+  const q = $('#q').value.trim().toLowerCase();
+  const mode = $('#filter').value;
+  const now = Date.now();
+
+  let items = [...games].sort((a,b)=> new Date(a.when) - new Date(b.when));
+  if (mode === 'upcoming') items = items.filter(g => new Date(g.when).getTime() >= now);
+  if (mode === 'past') items = items.filter(g => new Date(g.when).getTime() < now).reverse();
+  if (q) items = items.filter(g => (g.title+' '+g.where+' '+(g.format||'')).toLowerCase().includes(q));
+
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">// ИГР НЕ НАЙДЕНО. ДАВИ «+ ДОБАВИТЬ ИГРУ» И ЗАБИВАЙ ПОЛЕ //</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(g => {
+    const soon = new Date(g.when).getTime() - now < 7*864e5 && new Date(g.when).getTime() >= now;
+    const past = new Date(g.when).getTime() < now;
+    const full = g.slots && g.taken >= g.slots;
+    const status = past ? '<span class="status done">ЗАВЕРШЕНА</span>'
+      : full ? '<span class="status full">ЗАПОЛНЕНО</span>'
+      : '<span class="status open">НАБОР ОТКРЫТ</span>';
+    const pct = g.slots ? Math.min(100, Math.round(g.taken/g.slots*100)) : 0;
+    return `<article class="card ${past?'past':''} ${soon&&!past?'soon':''}">
+      ${status}
+      <h2>${esc(g.title)}</h2>
+      <div class="meta">
+        <div>📅 <b>${fmtDate(g.when)}</b></div>
+        <div>📍 <b>${esc(g.where)}</b></div>
+        ${g.format ? `<div>⚔ <b>${esc(g.format)}</b></div>` : ''}
+        <div>💰 Взвод: <b>${g.price ? Number(g.price).toLocaleString('ru-RU')+' ₽' : 'бесплатно'}</b></div>
+      </div>
+      ${g.desc ? `<div class="desc">${esc(g.desc)}</div>` : ''}
+      ${g.slots ? `<div class="slots">
+        <small>СОСТАВ: ${g.taken}/${g.slots}</small>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+      </div>` : ''}
+      <div class="actions">
+        ${past ? '' : full
+          ? '<button class="btn ghost" disabled style="opacity:.5;cursor:not-allowed">Мест нет</button>'
+          : `<button class="btn" onclick="joinGame('${g.id}')">Записаться</button>`}
+        <button class="btn ghost" onclick="delGame('${g.id}')" title="Удалить">✕</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+window.joinGame = id => {
+  const g = games.find(x => x.id === id);
+  if (!g) return;
+  g.taken = (g.taken||0) + 1;
+  save(); render();
+};
+window.delGame = id => {
+  if (!confirm('Удалить анонс игры?')) return;
+  games = games.filter(x => x.id !== id);
+  save(); render();
+};
+
+$('#addBtn').onclick = () => { form.reset(); dlg.showModal(); };
+form.onsubmit = e => {
+  if (e.submitter && e.submitter.value === 'cancel') return;
+  const fd = new FormData(form);
+  const g = Object.fromEntries(fd.entries());
+  if (!g.title || !g.when || !g.where) { e.preventDefault(); return; }
+  games.push({
+    id: 'g' + Date.now(),
+    title: g.title.trim(),
+    when: g.when,
+    where: g.where.trim(),
+    format: (g.format||'').trim(),
+    price: Number(g.price)||0,
+    slots: Number(g.slots)||0,
+    taken: Number(g.taken)||0,
+    desc: (g.desc||'').trim()
+  });
+  save(); render();
+};
+$('#q').oninput = render;
+$('#filter').onchange = render;
+
+render();
+</script>
+</body>
+</html>
