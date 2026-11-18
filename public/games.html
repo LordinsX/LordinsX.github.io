@@ -236,16 +236,19 @@
   }
   .field input:focus, .field textarea:focus { border-color: var(--accent); }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#net{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--dim,#7a8a6a);border:1px solid rgba(255,255,255,.15);padding:3px 8px;white-space:nowrap}
+#net.on{color:#7ddf64;border-color:#7ddf64}#net.off{color:#e0b34d;border-color:#e0b34d}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">AIRSOFT<span>//</span>OPS</div>
+  <div id="net" title="Статус синхронизации"></div>
   <nav>
-    <a href="/games.html" class="active">ИГРЫ</a>
-    <a href="/">ТАКТИЧЕСКАЯ КАРТА</a>
-    <a href="/admin.html">КОМАНДНЫЙ ПУНКТ</a>
+    <a href="./games.html" class="active">ИГРЫ</a>
+    <a href="./index.html">ТАКТИЧЕСКАЯ КАРТА</a>
+    <a href="./admin.html">КОМАНДНЫЙ ПУНКТ</a>
   </nav>
 </header>
 
@@ -326,11 +329,39 @@ function days(n){ const d = new Date(); d.setDate(d.getDate()+n); return d; }
 function iso(d, h){ d.setHours(h,0,0,0); const p=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
 
-let games = load();
-if (!games) { games = seed; save(); }
+// Синхронизация через Firebase Realtime Database (работает статично, без сервера — подходит для GitHub Pages).
+const FIREBASE_URL = 'https://lordinsxtest-default-rtdb.europe-west1.firebasedatabase.app';
+const FB_PATH = '/airsoft_games.json';
+let games = [];
+let fbOk = false;
 
-function load(){ try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
-function save(){ localStorage.setItem(LS_KEY, JSON.stringify(games)); }
+function localLoad(){ try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
+function localSave(){ try { localStorage.setItem(LS_KEY, JSON.stringify(games)); } catch(e){} }
+
+async function load(){
+  try {
+    const r = await fetch(FIREBASE_URL + FB_PATH + '?_=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if (d && Array.isArray(d) && d.length) { games = d; fbOk = true; localSave(); return; }
+    if (d && !Array.isArray(d)) { games = Object.values(d); fbOk = true; localSave(); return; }
+    fbOk = true; // база доступна, но пуста — можно сеять демо
+  } catch(e) { console.warn('Firebase недоступен, работаем локально:', e.message); }
+  games = localLoad() || seed.slice();
+  localSave();
+  if (fbOk) persist(); // засеваем демо в общую базу при первом запуске
+}
+
+async function persist(){
+  localSave();
+  if (!fbOk) return;
+  try {
+    const r = await fetch(FIREBASE_URL + FB_PATH, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(games) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+  } catch(e) { console.warn('Не удалось сохранить в Firebase:', e.message); }
+}
+
+function save(){ persist(); render(); }
 
 const $ = s => document.querySelector(s);
 const list = $('#list'), dlg = $('#dlg'), form = $('#form');
@@ -423,7 +454,19 @@ form.onsubmit = e => {
 $('#q').oninput = render;
 $('#filter').onchange = render;
 
-render();
+load().then(()=>{
+  const net=$('#net');
+  if(net){ net.textContent = fbOk ? '// ОНЛАЙН-СИНХРО' : '// ЛОКАЛЬНЫЙ РЕЖИМ'; net.className = fbOk ? 'on' : 'off'; }
+  render();
+  if (fbOk) setInterval(async ()=>{ // раз в 30 с подтягиваем изменения от других игроков
+    try {
+      const r = await fetch(FIREBASE_URL + FB_PATH + '?_=' + Date.now(), {cache:'no-store'});
+      const d = await r.json();
+      const remote = Array.isArray(d) ? d : (d ? Object.values(d) : null);
+      if (remote && JSON.stringify(remote) !== JSON.stringify(games)) { games = remote; localSave(); render(); }
+    } catch(e){}
+  }, 30000);
+});
 </script>
 </body>
 </html>
