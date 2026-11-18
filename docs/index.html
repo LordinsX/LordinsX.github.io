@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIRSOFT OPS // Анонсы страйкбольных игр</title>
+<meta name="description" content="Лента анонсов страйкбольных игр: сценарки, MilSim, CQB, зарницы. Календарь игр, запись в состав, контакты координатора.">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
 
@@ -238,6 +239,68 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 #net{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--dim,#7a8a6a);border:1px solid rgba(255,255,255,.15);padding:3px 8px;white-space:nowrap}
 #net.on{color:#7ddf64;border-color:#7ddf64}#net.off{color:#e0b34d;border-color:#e0b34d}
+
+  /* Hero badge + stats */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #0a0d08;
+    background: var(--accent2);
+    padding: 5px 14px;
+    margin-bottom: 14px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 rgba(244,196,48,.5)} 50%{box-shadow:0 0 18px rgba(244,196,48,.7)} }
+  .stats {
+    display: flex; justify-content: center; gap: clamp(16px, 4vw, 48px);
+    margin-top: 18px; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat b { display: block; font-family: var(--mono); font-size: 26px; color: var(--accent2); }
+  .stat span { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: 1px; }
+
+  /* Sections */
+  .section { max-width: 1100px; margin: 0 auto; padding: 26px clamp(16px, 4vw, 48px) 10px; scroll-margin-top: 20px; }
+  .section-title {
+    font-family: var(--mono); font-size: 15px; letter-spacing: 3px;
+    color: var(--green); border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 16px;
+  }
+  .section .toolbar { padding: 0 0 14px; }
+  .about-grid, .join-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .about-card {
+    background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px;
+  }
+  .about-card h3 { font-family: var(--mono); font-size: 14px; color: var(--accent2); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .about-card p { font-size: 15px; line-height: 1.5; color: var(--text); }
+  .contacts { font-family: var(--mono); font-size: 13px; line-height: 2; }
+  ul.rules { list-style: none; display: grid; gap: 8px; }
+  ul.rules li { font-size: 14px; line-height: 1.4; padding-left: 18px; position: relative; }
+  ul.rules li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+  a.btn.ghost { display: inline-block; margin-top: 6px; }
+
+  /* Calendar */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-head h3 { font-family: var(--mono); color: var(--accent2); letter-spacing: 2px; }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-nav button {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    font-family: var(--mono); padding: 4px 12px; cursor: pointer;
+  }
+  .cal-nav button:hover { border-color: var(--accent); color: var(--accent2); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal .dow { font-family: var(--mono); font-size: 11px; color: var(--dim); text-align: center; padding: 4px 0; letter-spacing: 1px; }
+  .cal .day {
+    min-height: 62px; background: var(--bg2); border: 1px solid var(--border);
+    padding: 4px 6px; font-family: var(--mono); font-size: 12px; color: var(--dim);
+  }
+  .cal .day.blank { background: transparent; border: none; }
+  .cal .day.today { border-color: var(--green); color: var(--green); }
+  .cal .day.has-game { border-color: var(--accent); cursor: pointer; }
+  .cal .day.has-game:hover { background: var(--bg3); }
+  .cal .day .ev { display: block; margin-top: 4px; font-size: 10px; color: var(--accent2); line-height: 1.25; overflow: hidden; max-height: 3em; }
+  @media (max-width: 640px) { .cal .day { min-height: 40px; } .cal .day .ev { display: none; } .cal .day.has-game::after { content: '●'; color: var(--accent); float: right; } }
 </style>
 </head>
 <body>
@@ -246,30 +309,91 @@
   <div class="logo">AIRSOFT<span>//</span>OPS</div>
   <div id="net" title="Статус синхронизации"></div>
   <nav>
-    <a href="index.html" class="active">ИГРЫ</a>
-    <a href="../index.html">ТАКТИЧЕСКАЯ КАРТА</a>
-    <a href="../admin.html">КОМАНДНЫЙ ПУНКТ</a>
+    <a href="#upcoming">ПРЕДСТОЯЩИЕ</a>
+    <a href="#calendar">КАЛЕНДАРЬ</a>
+    <a href="#join">ЗАПИСЬ</a>
+    <a href="#about">О ПРОЕКТЕ</a>
   </nav>
 </header>
 
 <section class="hero">
+  <div class="badge">🔥 БЛИЖАЙШАЯ ИГРА ЧЕРЕЗ <b id="countdownD">—</b> ДНЕЙ</div>
   <h1>Анонсы <b>страйкбольных игр</b></h1>
   <p>ПОЛИГОН // ВЫЕЗД // МЕСТО // СЦЕНАРИЙ — выбирай игру и записывайся в состав</p>
+  <div class="stats" id="stats"></div>
 </section>
 
-<div class="toolbar">
-  <input id="q" type="search" placeholder="Поиск по названию / месту...">
-  <select id="filter">
-    <option value="upcoming">Предстоящие</option>
-    <option value="all">Все игры</option>
-    <option value="past">Прошедшие</option>
-  </select>
-  <button class="btn ghost" id="addBtn">+ Добавить игру</button>
-</div>
+<section class="section" id="about">
+  <h2 class="section-title">// О ПРОЕКТЕ</h2>
+  <div class="about-grid">
+    <div class="about-card">
+      <h3>Что это</h3>
+      <p>AIRSOFT//OPS — лента анонсов страйкбольных игр нашего клуба и соседских команд: сценарки, MilSim, CQB-вечеринки, зарницы для новичков. Все игры в одном месте, без чатов на 500 сообщений.</p>
+    </div>
+    <div class="about-card">
+      <h3>Как записаться</h3>
+      <p>Выбирай игру → жми «Записаться» или пиши координатору в Telegram <a href="https://t.me/airsoft_ops" target="_blank">@airsoft_ops</a>. Взвод кидаешь на карту координатора, бронь держим 48 часов.</p>
+    </div>
+    <div class="about-card">
+      <h3>Требования к игрокам</h3>
+      <p>С 18 лет, маска/защита глаз обязательна, хоп-ап по классу игры, адекватность на поле. Новичкам выдаём привод и объясняем правила — приходи, научим.</p>
+    </div>
+  </div>
+</section>
 
-<main id="list"></main>
+<section class="section" id="upcoming">
+  <h2 class="section-title">// ЛЕНТА ИГР</h2>
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="Поиск по названию / месту...">
+    <select id="filter">
+      <option value="upcoming">Предстоящие</option>
+      <option value="all">Все игры</option>
+      <option value="past">Прошедшие</option>
+    </select>
+    <button class="btn ghost" id="addBtn">+ Добавить игру</button>
+  </div>
+  <main id="list"></main>
+</section>
 
-<footer>AIRSOFT OPS © 2026 · MILES PROOF OF GUNPOWDER · данные хранятся локально в браузере (localStorage)</footer>
+<section class="section" id="calendar">
+  <h2 class="section-title">// КАЛЕНДАРЬ ИГР</h2>
+  <div id="calWrap"></div>
+</section>
+
+<section class="section joinbox" id="join">
+  <h2 class="section-title">// ЗАПИСЬ И СВЯЗЬ</h2>
+  <div class="join-grid">
+    <div class="about-card">
+      <h3>Координатор</h3>
+      <p>Запись, вопросы по сценариям, взводу и логистике:</p>
+      <p class="contacts">
+        ✆ +7 (900) 000-00-00 — Майор<br>
+        ✉ <a href="mailto:ops@airsoft.example">ops@airsoft.example</a><br>
+        ✈ <a href="https://t.me/airsoft_ops" target="_blank">Telegram-канал с анонсами</a><br>
+        🛡 Группа VK: <a href="https://vk.com/airsoft_ops" target="_blank">vk.com/airsoft_ops</a>
+      </p>
+    </div>
+    <div class="about-card">
+      <h3>Регламент записи</h3>
+      <ul class="rules">
+        <li>Запись открыта до заполнения состава или за 2 дня до игры.</li>
+        <li>Отмена позже 48 часов — взвод не возвращается.</li>
+        <li>Опоздание более 30 минут — без брифинга на поле не допускаем.</li>
+        <li>Маска на поле всегда. Снял маску — ушёл с поля.</li>
+      </ul>
+    </div>
+    <div class="about-card">
+      <h3>Новичкам</h3>
+      <p>Нет привода? Не страшно. На пробные игры выдаём complete-комплекты: привод, маска, форма. Приходи на «Зарницу для новичков» — научим стрелять, прятаться и не подставлять своих.</p>
+      <p><a class="btn ghost" href="#upcoming">Смотреть игры для новичков</a></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  AIRSOFT OPS © 2026 · MILES PROOF OF GUNPOWDER<br>
+  Статичный сайт для GitHub Pages · синхронизация анонсов через Firebase REST, офлайн — localStorage
+</footer>
 
 <dialog id="dlg">
   <form method="dialog" class="modal-body" id="form">
@@ -322,6 +446,18 @@ const seed = [
     when: iso(-days(21), 12), where: 'Лесополоса, ур. Берёзовка',
     format: 'TDM, свободные правила', price: 0, slots: 30, taken: 26,
     desc: 'Пробная бесплатная игра: выдаём приводы и маски, объясняем правила за 20 минут.\nИдеально, чтобы впервые подстрелить соседа по команде.'
+  },
+  {
+    id: 'g5', title: 'Ночная рейд-игра «ФАРЫ»',
+    when: iso(+days(9), 21), where: 'Полигон «Дубрава», сектор B',
+    format: 'Рейд, ночной этап, ПНВ', price: 700, slots: 32, taken: 19,
+    desc: 'Ночной рейд: захват склада и отход на точку сбора за 3 часа.\nPND приветствуется, ИК-метки обязательны. Светлячки — только координаторам.'
+  },
+  {
+    id: 'g6', title: 'Сценарка «ТАМОЖНЯ» (ремейк)',
+    when: iso(+days(23), 10), where: 'Карьер «Северный», КПП-2',
+    format: 'Сценарка, конвои, блокпосты', price: 1000, slots: 50, taken: 8,
+    desc: 'Ремейк летней классики: ЧВК против контрабандистов на блокпосту.\nНовая легенда, техника, пиротехника на старте. Взвод — в кассу сцены.'
   }
 ];
 
@@ -373,7 +509,7 @@ function fmtDate(isoStr){
 }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function render(){
+var render = function(){
   const q = $('#q').value.trim().toLowerCase();
   const mode = $('#filter').value;
   const now = Date.now();
@@ -453,6 +589,79 @@ form.onsubmit = e => {
 };
 $('#q').oninput = render;
 $('#filter').onchange = render;
+
+/* ===== Статистика, обратный отсчёт, календарь ===== */
+let calMonth = new Date(); calMonth.setDate(1);
+
+function renderStats(){
+  const now = Date.now();
+  const upcoming = games.filter(g => new Date(g.when).getTime() >= now)
+    .sort((a,b)=> new Date(a.when) - new Date(b.when));
+  const free = upcoming.reduce((s,g)=> s + Math.max(0, (g.slots||0)-(g.taken||0)), 0);
+  $('#stats').innerHTML = `
+    <div class="stat"><b>${upcoming.length}</b><span>ИГР В ПЛАНАХ</span></div>
+    <div class="stat"><b>${free}</b><span>СВОБОДНЫХ МЕСТ</span></div>
+    <div class="stat"><b>${games.length}</b><span>ВСЕГО АНОНСОВ</span></div>`;
+  const cd = $('#countdownD');
+  if (upcoming.length) {
+    const d = Math.ceil((new Date(upcoming[0].when) - now) / 864e5);
+    cd.textContent = d <= 0 ? 'СЕГОДНЯ' : d;
+  } else { cd.textContent = '—'; }
+}
+
+function renderCalendar(){
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  const monthName = calMonth.toLocaleDateString('ru-RU', { month:'long', year:'numeric' });
+  const first = new Date(y, m, 1);
+  let startIdx = (first.getDay() + 6) % 7; // неделя с ПН
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const byDay = {};
+  for (const g of games) {
+    const d = new Date(g.when);
+    if (d.getFullYear() === y && d.getMonth() === m) {
+      (byDay[d.getDate()] ||= []).push(g);
+    }
+  }
+  let cells = '';
+  for (let i = 0; i < startIdx; i++) cells += '<div class="day blank"></div>';
+  for (let dnum = 1; dnum <= daysInMonth; dnum++) {
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===dnum;
+    const evs = byDay[dnum] || [];
+    cells += `<div class="day ${isToday?'today':''} ${evs.length?'has-game':''}" ${evs.length?`onclick="calJump('${y}-${String(m+1).padStart(2,'0')}-${String(dnum).padStart(2,'0')}')"`:''}>
+      ${dnum}${evs.map(g=>`<span class="ev">⚔ ${esc(g.title)}</span>`).join('')}
+    </div>`;
+  }
+  $('#calWrap').innerHTML = `
+    <div class="cal-head">
+      <h3>${monthName.toUpperCase()}</h3>
+      <div class="cal-nav">
+        <button onclick="calShift(-1)">◀</button>
+        <button onclick="calToday()">СЕГОДНЯ</button>
+        <button onclick="calShift(1)">▶</button>
+      </div>
+    </div>
+    <div class="cal">
+      ${['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'].map(d=>`<div class="dow">${d}</div>`).join('')}
+      ${cells}
+    </div>`;
+}
+window.calShift = n => { calMonth.setMonth(calMonth.getMonth()+n); renderCalendar(); };
+window.calToday = () => { calMonth = new Date(); calMonth.setDate(1); renderCalendar(); };
+window.calJump = dayIso => {
+  $('#filter').value = 'all';
+  $('#q').value = '';
+  render();
+  document.getElementById('upcoming').scrollIntoView({ behavior:'smooth' });
+  setTimeout(()=>{
+    document.querySelectorAll('.card').forEach(c => {
+      if (c.outerHTML.includes(dayIso.slice(8))) c.style.boxShadow = '0 0 0 2px var(--green)';
+    });
+  }, 300);
+};
+
+const _origRender = render;
+render = function(){ _origRender(); renderStats(); renderCalendar(); };
 
 load().then(()=>{
   const net=$('#net');
